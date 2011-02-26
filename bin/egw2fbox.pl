@@ -247,12 +247,12 @@ EOF
 
 		my $number_of_numbers = 0;
 		# counting phone numbers is only in compact mode needed
-		if($cfg->{COMPACT_MODE}) { 
+		if($cfg->{FBOX_COMPACT_MODE}) { 
 			$number_of_numbers = count_contacts_numbers($key);
 			verbose ("contact has $number_of_numbers phone numbers defined"); 
 			}
 
-		if ( ($cfg->{COMPACT_MODE}) && ($number_of_numbers <= 3) ){
+		if ( ($cfg->{FBOX_COMPACT_MODE}) && ($number_of_numbers <= 3) ){
 
 			verbose ("entering compact mode for this contact entry");
 			my @numbers_array;
