@@ -17,7 +17,7 @@ NEWHASH=$(cat $DATADIR/phonebook.xml | grep -v mod_time | md5sum | cut -d" " -f1
 OLDHASH=$(cat $DATADIR/phonebook.hash 2>/dev/null)
 
 if [ "_$OLDHASH" != "_$NEWHASH" ]; then
-	export FRITZUPLOADERCFG=$CONFDIR/egw2box.conf
+	export FRITZUPLOADERCFG=$CONFDIR/egw2fbox.conf
 	$BINDIR/fritzuploader.pl
 
 	if [ $? -eq 0 ]; then

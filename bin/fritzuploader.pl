@@ -21,6 +21,7 @@ use LWP;
 use XML::Simple;
 use Digest::MD5 qw(md5 md5_hex);
 use Encode;
+use Data::Dumper;
 
 ##### use config file instead of command line argiments 
 # added config file routine by Kai Ellinger <coding@blicke.de>
@@ -55,11 +56,11 @@ sub parse_config {
 	}
 	close CONFIG;
 }
+parse_config;
 
 my $fritz = $cfg->{FRITZUPLOADER_FRITZBOX_IP};	# or IP address '192.168.1.1'
 my $password = $cfg->{FRITZUPLOADER_FRITZBOX_PW};
 my $phonebookFile = $cfg->{FRITZUPLOADER_XML_FILE};
-print "--$password--$phonebookFile--$fritz\n";
 #my $password = $ARGV[0] or die "Usage: $0 fritzbox-password\n";
 # END modification
 
