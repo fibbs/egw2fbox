@@ -37,6 +37,7 @@ my $cFile = 'fritzuploader.conf';
 #FRITZUPLOADER_FRITZBOX_PW = <fbox_admin_password>
 #FRITZUPLOADER_XML_FILE = /path/to/phonebook.xml
 #----------------------------------------------------
+### export FRITZUPLOADERCFG=/any/other/file.conf
 if($ENV{FRITZUPLOADERCFG}) { $cFile = $ENV{FRITZUPLOADERCFG}; }
 sub parse_config {
 	open (CONFIG, "$cFile") or die "could not open config file '$cFile': $!";
