@@ -1,6 +1,6 @@
 #!/bin/bash
 
-while getopts  "c:" flag
+while getopts "c:" flag
 do
   case "$flag" in
 	c)
@@ -9,11 +9,13 @@ do
   esac
 done
 
-if [ -z $CONFIGFILE ]; then
+if [ -z $CONFIGFILE ]
+then
 	echo "you must supply a config file using the -c argument"
 	exit 253
 
-elif [ ! -f "$CONFIGFILE" ]; then
+elif [ ! -f "$CONFIGFILE" ]
+then
 	echo "could not open config file"
 	exit 254
 fi
@@ -26,15 +28,15 @@ if [ ! -d "$BASEDIR" ]; then
 fi
 
 BINDIR=$BASEDIR/bin
-CONFDIR=$BASEDIR/etc
 DATADIR=$BASEDIR/data
+
 # create data files viewable for user only
 umask 077
 
 cd $BASEDIR
 
 # call the magic perl script
-$BINDIR/egw2fbox.pl -c $CONFDIR/egw2fbox.conf
+$BINDIR/egw2fbox.pl -c $CONFIGFILE
 if [ $? -ne 0 ]; then
 	echo "egroupware exporter did not finish correctly"
 	exit 251
@@ -45,7 +47,7 @@ NEWHASH=$(cat $DATADIR/phonebook.xml | grep -v mod_time | md5sum | cut -d" " -f1
 OLDHASH=$(cat $DATADIR/phonebook.hash 2>/dev/null)
 
 if [ "_$OLDHASH" != "_$NEWHASH" ]; then
-	export FRITZUPLOADERCFG=$CONFDIR/egw2fbox.conf
+	export FRITZUPLOADERCFG=$CONFIGFILE
 	$BINDIR/fritzuploader.pl
 
 	if [ $? -eq 0 ]; then
