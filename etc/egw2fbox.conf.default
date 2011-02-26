@@ -26,3 +26,9 @@ COMPACT_MODE = 1
 FRITZUPLOADER_FRITZBOX_IP = fritz.box
 FRITZUPLOADER_FRITZBOX_PW = <fb_admin_password>
 FRITZUPLOADER_XML_FILE = /path/to/phonebook.xml
+
+
+############################################
+### config parameters for cronjob.sh
+############################################
+CRON_BASEDIR = /path/to/egw2fbox_basedir
