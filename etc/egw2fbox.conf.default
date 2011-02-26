@@ -11,14 +11,14 @@ EGW_DBPASS = <db_password>
 EGW_ADDRBOOK_OWNERS = <id1>,<id2>
 
 # for XML generation (Fritzbox)
-OUTPUT_XML_FILE = /path/to/phonebook.xml
-TOTAL_NAME_LENGTH = 16
-BUSINESS_SUFFIX_STRING = W
-PRIVATE_SUFFIX_STRING = P
-
+FBOX_OUTPUT_XML_FILE = /path/to/phonebook.xml
+# try 16 characters for Siemens Gigaset DECT phones and 18 characters for FritzPhone
+FBOX_TOTAL_NAME_LENGTH = 16
+FBOX_BUSINESS_SUFFIX_STRING = W
+FBOX_PRIVATE_SUFFIX_STRING = P
 # compact_mode creates only one phone book entry if less than 3 phone numbers exist:
 # COMPACT_MODE = 0|1 # 0 = off ; 1 = on
-COMPACT_MODE = 1
+FBOX_COMPACT_MODE = 1
 
 ############################################
 ### config parameters for fritzuploader.pl
