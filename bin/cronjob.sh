@@ -1,5 +1,7 @@
 #!/bin/bash
 
+### INIT
+# read command line option: cronjob.sh -c config.file 
 while getopts "c:" flag
 do
   case "$flag" in
@@ -9,6 +11,7 @@ do
   esac
 done
 
+# read config file
 if [ -z $CONFIGFILE ]
 then
 	echo "you must supply a config file using the -c argument"
@@ -30,6 +33,8 @@ fi
 BINDIR=$BASEDIR/bin
 DATADIR=$BASEDIR/data
 
+
+### DO WORK
 # create data files viewable for user only
 umask 077
 
