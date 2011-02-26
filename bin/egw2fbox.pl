@@ -168,12 +168,12 @@ sub write_xml_contact {
 
 	# reformat name according to max length and suffix
 	if ($contact_name_suffix) {
-		$name_length = min($cfg->{TOTAL_NAME_LENGTH},$FboxMaxLenghtForName) - 1 - length($contact_name_suffix);
+		$name_length = min($cfg->{FBOX_TOTAL_NAME_LENGTH},$FboxMaxLenghtForName) - 1 - length($contact_name_suffix);
 		$output_name = substr($contact_name,0,$name_length);
 		$output_name =~ s/\s+$//;
 		$output_name = $output_name . " " . $contact_name_suffix;
 	} else {
-		$name_length = min($cfg->{TOTAL_NAME_LENGTH},$FboxMaxLenghtForName);
+		$name_length = min($cfg->{FBOX_TOTAL_NAME_LENGTH},$FboxMaxLenghtForName);
 		$output_name = substr($contact_name,0,$name_length);
 		$output_name =~ s/\s+$//;
 	}
@@ -214,7 +214,7 @@ sub count_contacts_numbers {
 sub gen_fritz_xml {
 	my $now_timestamp = time();
 
-	open (FRITZXML, ">", $cfg->{OUTPUT_XML_FILE}) or die "could not open file! $!";
+	open (FRITZXML, ">", $cfg->{FBOX_OUTPUT_XML_FILE}) or die "could not open file! $!";
 	print FRITZXML <<EOF;
 <?xml version="1.0" encoding="${FboxAsciiCodeTable}"?>
 <phonebooks>
@@ -312,7 +312,7 @@ EOF
 				push @numbers_array, { type=>'mobile', nr=>$egw_address_data->{$key}->{'tel_cell'} };
 				push @numbers_array, { type=>'work',   nr=>$egw_address_data->{$key}->{'tel_assistent'} };
 
-				write_xml_contact($contact_name, $cfg->{BUSINESS_SUFFIX_STRING}, \@numbers_array);
+				write_xml_contact($contact_name, $cfg->{FBOX_BUSINESS_SUFFIX_STRING}, \@numbers_array);
 			}
 			# end print the business contact entry
 
@@ -330,7 +330,7 @@ EOF
 				push @numbers_array, { type=>'mobile', nr=>$egw_address_data->{$key}->{'tel_cell_private'} };
 				push @numbers_array, { type=>'work',   nr=>$egw_address_data->{$key}->{'tel_other'} };
 
-				write_xml_contact($contact_name, $cfg->{PRIVATE_SUFFIX_STRING}, \@numbers_array);
+				write_xml_contact($contact_name, $cfg->{FBOX_PRIVATE_SUFFIX_STRING}, \@numbers_array);
 			}
 			# end print the business contact entry
 		}
