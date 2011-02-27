@@ -4,7 +4,7 @@
 # 1.1 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
 # http://www.mozilla.org/MPL/
-# 
+#
 # Software distributed under the License is distributed on an "AS IS" basis,
 # WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
 # for the specific language governing rights and limitations under the
@@ -23,7 +23,7 @@ use Digest::MD5 qw(md5 md5_hex);
 use Encode;
 use Data::Dumper;
 
-##### use config file instead of command line argiments 
+##### use config file instead of command line argiments
 # added config file routine by Kai Ellinger <coding@blicke.de>
 # START modification
 my $cfg;
@@ -41,7 +41,7 @@ my $cFile = 'fritzuploader.conf';
 if($ENV{FRITZUPLOADERCFG}) { $cFile = $ENV{FRITZUPLOADERCFG}; }
 sub parse_config {
 	open (CONFIG, "$cFile") or die "could not open config file '$cFile': $!";
-	
+
 	while(defined(my $line = <CONFIG>) )
 	{
 		chomp $line;
@@ -59,7 +59,7 @@ sub parse_config {
 }
 parse_config;
 
-my $fritz = $cfg->{FRITZUPLOADER_FRITZBOX_IP};	# or IP address '192.168.1.1'
+my $fritz = $cfg->{FRITZUPLOADER_FRITZBOX_IP};  # or IP address '192.168.1.1'
 my $password = $cfg->{FRITZUPLOADER_FRITZBOX_PW};
 my $phonebookFile = $cfg->{FRITZUPLOADER_XML_FILE};
 #my $password = $ARGV[0] or die "Usage: $0 fritzbox-password\n";
@@ -101,11 +101,11 @@ my $loginresp = $ua->request($resp);
 die "Can't get SID " . $loginresp->status_line() . "\n" unless $loginresp->is_success();
 
 # print $xx->content();
-#	<SessionInfo>
-#	<iswriteaccess>1</iswriteaccess>
-#	<SID>166ef35a5f4b4577</SID>
-#	<Challenge>2a91cc5f</Challenge>
-#	</SessionInfo>
+# <SessionInfo>
+# <iswriteaccess>1</iswriteaccess>
+# <SID>166ef35a5f4b4577</SID>
+# <Challenge>2a91cc5f</Challenge>
+# </SessionInfo>
 
 my $SID = XMLin($loginresp->content)->{SID};
 
@@ -116,15 +116,15 @@ die "Authentication failed. (Password incorrect?)\n" if $SID eq '000000000000000
 $resp = $ua->post($firmwurl,
 	[
 		'sid' => [ undef, undef, 'Content' => "$SID", ],
-		'PhonebookId'	=> [
+		'PhonebookId' => [
 			undef,
 			undef,
-			'Content' => " 0",	# space on purpose; needs zero
+			'Content' => " 0",  # space on purpose; needs zero
 			],
-		'PhonebookImportFile'	=> [
-			$phonebookFile,
-			$phonebookFile,
-			'Content_Type' => 'text/xml'
+		'PhonebookImportFile' => [
+				$phonebookFile,
+				$phonebookFile,
+				'Content_Type' => 'text/xml'
 			]
 	],
 	'Content_Type' => 'form-data');

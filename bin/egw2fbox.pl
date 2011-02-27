@@ -10,38 +10,38 @@ use List::Util qw [min max];
 ### CHANGELOG
 # 0.3.0 2011-02-26 Kai Ellinger <coding@blicke.de>
 #                  - Verbose function:
-#                    * only prints if data was provided 
+#                    * only prints if data was provided
 #                    * avoiding unneccesary verbose function calls
 #                    * avoiding runtime errors due to uninitialized data in verbode mode
 #                  - Respect that Fritzbox address book names can only have 25 characters
 #                  - EGW address book to Fritz Box phone book mapping:
 #                    The Fritz Box Phone book knows 3 different telephone number types:
 #                      'work', 'home' and 'mobile'
-#                    Each Fritz Box phone book entry can have up to 3 phone numbers. 
+#                    Each Fritz Box phone book entry can have up to 3 phone numbers.
 #                    All 1-3 phone numbers can be of same type or differnt types.
-#                    * Compact mode (if one EGW address has 1-3 phone numbers): 
-#						EGW field tel_work          -> FritzBox field type 'work'
-#						EGW field tel_cell          -> FritzBox field type 'mobile'
-#						EGW field tel_assistent     -> FritzBox field type 'work'
-#						EGW field tel_home          -> FritzBox field type 'home'
-#						EGW field tel_cell_private  -> FritzBox field type 'mobile'
-#						EGW field tel_other         -> FritzBox field type 'home'
-#                      NOTE: Because we only have 3 phone numbers, we stick on the right number types. 
-#                    * Business Fritz Box phone book entry (>3 phone numbers): 
-#						EGW field tel_work          -> FritzBox field type 'work'
-#						EGW field tel_cell          -> FritzBox field type 'mobile'
-#						EGW field tel_assistent     -> FritzBox field type 'home'
-#                      NOTE: On hand sets, the list order is work, mobile, home. That's why the 
+#                    * Compact mode (if one EGW address has 1-3 phone numbers):
+#                       EGW field tel_work          -> FritzBox field type 'work'
+#                       EGW field tel_cell          -> FritzBox field type 'mobile'
+#                       EGW field tel_assistent     -> FritzBox field type 'work'
+#                       EGW field tel_home          -> FritzBox field type 'home'
+#                       EGW field tel_cell_private  -> FritzBox field type 'mobile'
+#                       EGW field tel_other         -> FritzBox field type 'home'
+#                      NOTE: Because we only have 3 phone numbers, we stick on the right number types.
+#                    * Business Fritz Box phone book entry (>3 phone numbers):
+#                       EGW field tel_work          -> FritzBox field type 'work'
+#                       EGW field tel_cell          -> FritzBox field type 'mobile'
+#                       EGW field tel_assistent     -> FritzBox field type 'home'
+#                      NOTE: On hand sets, the list order is work, mobile, home. That's why the
 #                            most important number is 'work' and the less important is 'home' here.
 #                    * Private Fritz Box phone book entry (>3 phone numbers):
-#						EGW field tel_home          -> FritzBox field type 'work'
-#						EGW field tel_cell_private  -> FritzBox field type 'mobile'
-#						EGW field tel_other         -> FritzBox field type 'home'
-#                      NOTE: On hand sets, the list order is work, mobile, home. That's why the 
+#                       EGW field tel_home          -> FritzBox field type 'work'
+#                       EGW field tel_cell_private  -> FritzBox field type 'mobile'
+#                       EGW field tel_other         -> FritzBox field type 'home'
+#                      NOTE: On hand sets, the list order is work, mobile, home. That's why the
 #                            most important number is 'work' and the less important is 'home' here.
 #                   - Added EGW DB connect string check
-#                   - All EGW functions have now prefix 'egw_', all Fritz Box functions prefix 
-#                     'fbox_' and all Round Cobe functions 'rcube_' to prepare the source for 
+#                   - All EGW functions have now prefix 'egw_', all Fritz Box functions prefix
+#                     'fbox_' and all Round Cobe functions 'rcube_' to prepare the source for
 #                     adding the roundcube sync.
 #
 # 0.2.0 2011-02-25 Christian Anton <mail@christiananton.de>
@@ -56,25 +56,25 @@ my $cfg;
 
 # the maximum number of characters that a Fritz box phone book name can have
 my $FboxMaxLenghtForName = 32;
-# Maybe the code page setting changes based on Fritz Box language settings 
+# Maybe the code page setting changes based on Fritz Box language settings
 # and must varry for characters other than germany special characters.
 # This variable can be used to specifx the code page used at the exported XML.
-my $FboxAsciiCodeTable = "iso-8859-1"; # 
+my $FboxAsciiCodeTable = "iso-8859-1"; #
 
 my $o_verbose;
 my $o_configfile = "egw2fbox.conf";
 
 sub check_args {
-        Getopt::Long::Configure ("bundling");
-        GetOptions(
-    	'v'   => \$o_verbose,		'verbose'	=> \$o_verbose,
-		'c:s' => \$o_configfile,	'config:s'	=> \$o_configfile
+				Getopt::Long::Configure ("bundling");
+				GetOptions(
+					'v'   => \$o_verbose,     'verbose'   => \$o_verbose,
+					'c:s' => \$o_configfile,  'config:s'  => \$o_configfile
 		);
 }
 
 sub parse_config {
 	open (CONFIG, "$o_configfile") or die "could not open config file: $!";
-	
+
 	while(defined(my $line = <CONFIG>) )
 	{
 		chomp $line;
@@ -105,7 +105,7 @@ sub egw_read_db {
 	my $sql;
 
 	my @res;
-	
+
 	# default values for DB connect
 	if (!$cfg->{EGW_DBHOST}) { $cfg->{EGW_DBHOST} = 'localhost'; }
 	if (!$cfg->{EGW_DBPORT}) { $cfg->{EGW_DBPORT} = 3306; }
@@ -113,7 +113,7 @@ sub egw_read_db {
 	# don't set default values for DB user and password
 	die "ERROR: EGW database can't be accessed without DB user name or password set!"
 		if( !($cfg->{EGW_DBUSER}) || !($cfg->{EGW_DBPASS}) );
-	
+
 	my $dsn = "dbi:mysql:$cfg->{EGW_DBNAME}:$cfg->{EGW_DBHOST}:$cfg->{EGW_DBPORT}";
 	$dbh = DBI->connect($dsn, $cfg->{EGW_DBUSER}, $cfg->{EGW_DBPASS}) or die "could not connect db: $!";
 	#$dbh->do("SET NAMES utf8");
@@ -121,24 +121,24 @@ sub egw_read_db {
 	$dbh->do("SET NAMES latin1");  # latin1 is good at least for XML files created with iso-8859-1
 
 	$sql = "
-	  SELECT 
-	    `contact_id`,
-	    `n_prefix`,
-	    `n_fn` ,
-	    `tel_work` ,
-	    `tel_cell` ,
-	    `tel_assistent` ,
-	    `tel_home` ,
-	    `tel_cell_private`,
-	    `tel_other`,
-	    `contact_email`,
-	    `contact_email_home`
-	FROM 
-	  `egw_addressbook` 
-	WHERE 
-	  `contact_owner` IN ( $cfg->{EGW_ADDRBOOK_OWNERS} )
+		SELECT
+			`contact_id`,
+			`n_prefix`,
+			`n_fn` ,
+			`tel_work` ,
+			`tel_cell` ,
+			`tel_assistent` ,
+			`tel_home` ,
+			`tel_cell_private`,
+			`tel_other`,
+			`contact_email`,
+			`contact_email_home`
+		FROM
+			`egw_addressbook`
+		WHERE
+			`contact_owner` IN ( $cfg->{EGW_ADDRBOOK_OWNERS} )
 	";
-	
+
 	$sth = $dbh->prepare($sql);
 	$sth->execute;
 
@@ -180,7 +180,7 @@ sub fbox_write_xml_contact {
 		$output_name = substr($contact_name,0,$name_length);
 		$output_name =~ s/\s+$//;
 	}
-	
+
 	# print the top XML wrap for the contact's entry
 	print FRITZXML "<contact>\n<category>0</category>\n<person><realName>$output_name</realName></person>\n";
 	print FRITZXML "<telephony>\n";
@@ -190,8 +190,8 @@ sub fbox_write_xml_contact {
 		$o_verbose && verbose ("   type: ". ($numbers_entry_ref->{'type'} || "<undefined>") . " , number: ". ($numbers_entry_ref->{'nr'}|| "<undefined>")  );
 		if ($$numbers_entry_ref{'nr'}) {
 			print FRITZXML "<number type=\"$$numbers_entry_ref{'type'}\" vanity=\"\" prio=\"0\">" .
-				       fbox_reformatTelNr($$numbers_entry_ref{'nr'}) . 
-				       "</number>\n";
+							 fbox_reformatTelNr($$numbers_entry_ref{'nr'}) .
+							 "</number>\n";
 		}
 	}
 
@@ -250,9 +250,9 @@ EOF
 
 		my $number_of_numbers = 0;
 		# counting phone numbers is only in compact mode needed
-		if($cfg->{FBOX_COMPACT_MODE}) { 
+		if($cfg->{FBOX_COMPACT_MODE}) {
 			$number_of_numbers = fbox_count_contacts_numbers($key);
-			verbose ("contact has $number_of_numbers phone numbers defined"); 
+			verbose ("contact has $number_of_numbers phone numbers defined");
 			}
 
 		if ( ($cfg->{FBOX_COMPACT_MODE}) && ($number_of_numbers <= 3) ){
@@ -302,12 +302,12 @@ EOF
 			verbose ("entering non-compact mode for this contact entry");
 
 			# start print the business contact entry
-			if ( 
-			  ($egw_address_data->{$key}->{'tel_work'}) || 
-			  ($egw_address_data->{$key}->{'tel_cell'}) || 
-			  ($egw_address_data->{$key}->{'tel_assistent'}) 
+			if (
+				($egw_address_data->{$key}->{'tel_work'}) ||
+				($egw_address_data->{$key}->{'tel_cell'}) ||
+				($egw_address_data->{$key}->{'tel_assistent'})
 			 ) {
-			 	
+
 				verbose ("  start writing the business contact entry");
 				my @numbers_array;
 
@@ -320,10 +320,10 @@ EOF
 			# end print the business contact entry
 
 			# start print the private contact entry
-			if ( 
-			  ($egw_address_data->{$key}->{'tel_home'}) || 
-			  ($egw_address_data->{$key}->{'tel_cell_private'}) || 
-			  ($egw_address_data->{$key}->{'tel_other'}) 
+			if (
+				($egw_address_data->{$key}->{'tel_home'}) ||
+				($egw_address_data->{$key}->{'tel_cell_private'}) ||
+				($egw_address_data->{$key}->{'tel_other'})
 			 ) {
 
 				verbose ("  start writing the private contact entry");
