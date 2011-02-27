@@ -1,12 +1,30 @@
 #!/usr/bin/perl
-
-use warnings;
-use strict;
-use Getopt::Long;
-use DBI;
-use Data::Dumper;
-use List::Util qw [min max];
-
+### FILE
+#       egw2fbox.pl - reads addresses from eGroupware database
+#                   - exports them to a XML file that can be imported to
+#                     the Fritz Box phone book via Fritz Box web interface
+#                   - exports them to the Round Cube web mailer address
+#                     inside the Round Cube database
+#
+### COPYRIGHT
+#       Copyright 2011  Christian Anton <mail@christiananton.de>
+#                       Kai Ellinger <coding@blicke.de>
+#
+#       This program is free software; you can redistribute it and/or modify
+#       it under the terms of the GNU General Public License as published by
+#       the Free Software Foundation; either version 2 of the License, or
+#       (at your option) any later version.
+#       
+#       This program is distributed in the hope that it will be useful,
+#       but WITHOUT ANY WARRANTY; without even the implied warranty of
+#       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#       GNU General Public License for more details.
+#       
+#       You should have received a copy of the GNU General Public License
+#       along with this program; if not, write to the Free Software
+#       Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+#       MA 02110-1301, USA.
+#
 ### CHANGELOG
 # 0.3.0 2011-02-26 Kai Ellinger <coding@blicke.de>
 #                  - Verbose function:
@@ -51,6 +69,12 @@ use List::Util qw [min max];
 # 0.1.0 2011-02-24 Kai Ellinger <coding@blicke.de>, Christian Anton <mail@christiananton.de>
 #                  Initial version of this script, ready for world domination ;-)
 
+use warnings;
+use strict;
+use Getopt::Long;
+use DBI;
+use Data::Dumper;
+use List::Util qw [min max];
 my $egw_address_data;
 my $cfg;
 
