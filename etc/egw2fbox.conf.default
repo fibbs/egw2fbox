@@ -31,6 +31,11 @@ FBOX_PRIVATE_SUFFIX_STRING = P
 # Enabling Round Cube export updates private and business mail addresses to round cube address book
 # RCUBE_EXPORT_ENABLED = 0|1 # 0 = off ; 1 = on
 RCUBE_EXPORT_ENABLED = 0
+RCUBE_DBHOST = 127.0.0.1
+RCUBE_DBPORT = 3306
+RCUBE_DBNAME = roundcubemail
+RCUBE_DBUSER = <db_username>
+RCUBE_DBPASS = <db_password>
 
 
 ############################################
