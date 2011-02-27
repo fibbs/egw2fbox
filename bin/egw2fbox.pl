@@ -14,7 +14,7 @@ use List::Util qw [min max];
 #                    * avoiding unneccesary verbose function calls
 #                    * avoiding runtime errors due to uninitialized data in verbode mode
 #                  - Respect that Fritzbox address book names can only have 25 characters
-#                  - EGW address boock to Fritz Box phone book mapping:
+#                  - EGW address book to Fritz Box phone book mapping:
 #                    The Fritz Box Phone book knows 3 different telephone number types:
 #                      'work', 'home' and 'mobile'
 #                    Each Fritz Box phone book entry can have up to 3 phone numbers. 
@@ -40,6 +40,9 @@ use List::Util qw [min max];
 #                      NOTE: On hand sets, the list order is work, mobile, home. That's why the 
 #                            most important number is 'work' and the less important is 'home' here.
 #                   - Added EGW DB connect string check
+#                   - All EGW functions have now prefix 'egw_', all Fritz Box functions prefix 
+#                     'fbox_' and all Round Cobe functions 'rcube_' to prepare the source for 
+#                     adding the roundcube sync.
 #
 # 0.2.0 2011-02-25 Christian Anton <mail@christiananton.de>
 #                  implementing XML-write as an extra function and implementing COMPACT_MODE which
@@ -96,7 +99,7 @@ sub verbose{
 	}
 }
 
-sub read_db {
+sub egw_read_db {
 	my $dbh;
 	my $sth;
 	my $sql;
@@ -148,7 +151,7 @@ sub read_db {
 	die "no data for owner(s) $cfg->{ADDRBOOK_OWNERS} found" if ( 0 == $amountData );
 }
 
-sub reformatTelNr {
+sub fbox_reformatTelNr {
 	my $Nr = shift;
 
 	$Nr =~ s/^\+/00/;
@@ -157,7 +160,7 @@ sub reformatTelNr {
 	return $Nr;
 }
 
-sub write_xml_contact {
+sub fbox_write_xml_contact {
 	my $contact_name = shift;
 	my $contact_name_suffix = shift;
 	my $numbers_array_ref = shift;
@@ -187,7 +190,7 @@ sub write_xml_contact {
 		$o_verbose && verbose ("   type: ". ($numbers_entry_ref->{'type'} || "<undefined>") . " , number: ". ($numbers_entry_ref->{'nr'}|| "<undefined>")  );
 		if ($$numbers_entry_ref{'nr'}) {
 			print FRITZXML "<number type=\"$$numbers_entry_ref{'type'}\" vanity=\"\" prio=\"0\">" .
-				       reformatTelNr($$numbers_entry_ref{'nr'}) . 
+				       fbox_reformatTelNr($$numbers_entry_ref{'nr'}) . 
 				       "</number>\n";
 		}
 	}
@@ -197,7 +200,7 @@ sub write_xml_contact {
 	print FRITZXML "<services /><setup /><mod_time>$now_timestamp</mod_time></contact>";
 }
 
-sub count_contacts_numbers {
+sub fbox_count_contacts_numbers {
 	my $key = shift;
 	my $count = 0;
 
@@ -211,7 +214,7 @@ sub count_contacts_numbers {
 	return $count;
 }
 
-sub gen_fritz_xml {
+sub fbox_gen_fritz_xml {
 	my $now_timestamp = time();
 
 	open (FRITZXML, ">", $cfg->{FBOX_OUTPUT_XML_FILE}) or die "could not open file! $!";
@@ -248,7 +251,7 @@ EOF
 		my $number_of_numbers = 0;
 		# counting phone numbers is only in compact mode needed
 		if($cfg->{FBOX_COMPACT_MODE}) { 
-			$number_of_numbers = count_contacts_numbers($key);
+			$number_of_numbers = fbox_count_contacts_numbers($key);
 			verbose ("contact has $number_of_numbers phone numbers defined"); 
 			}
 
@@ -292,7 +295,7 @@ EOF
 				push @numbers_array, { type=>'home', nr=>$egw_address_data->{$key}->{'tel_other'} };
 			}
 
-			write_xml_contact($contact_name, '', \@numbers_array);
+			fbox_write_xml_contact($contact_name, '', \@numbers_array);
 
 		} else {
 
@@ -312,7 +315,7 @@ EOF
 				push @numbers_array, { type=>'mobile', nr=>$egw_address_data->{$key}->{'tel_cell'} };
 				push @numbers_array, { type=>'work',   nr=>$egw_address_data->{$key}->{'tel_assistent'} };
 
-				write_xml_contact($contact_name, $cfg->{FBOX_BUSINESS_SUFFIX_STRING}, \@numbers_array);
+				fbox_write_xml_contact($contact_name, $cfg->{FBOX_BUSINESS_SUFFIX_STRING}, \@numbers_array);
 			}
 			# end print the business contact entry
 
@@ -330,7 +333,7 @@ EOF
 				push @numbers_array, { type=>'mobile', nr=>$egw_address_data->{$key}->{'tel_cell_private'} };
 				push @numbers_array, { type=>'work',   nr=>$egw_address_data->{$key}->{'tel_other'} };
 
-				write_xml_contact($contact_name, $cfg->{FBOX_PRIVATE_SUFFIX_STRING}, \@numbers_array);
+				fbox_write_xml_contact($contact_name, $cfg->{FBOX_PRIVATE_SUFFIX_STRING}, \@numbers_array);
 			}
 			# end print the business contact entry
 		}
@@ -346,10 +349,14 @@ EOF
 	close FRITZXML;
 }
 
+sub rcube_update_address_book {
+	verbose ("updating round cube address book");
+}
 
 #### MAIN
 
 check_args;
 parse_config;
-read_db;
-gen_fritz_xml;
+egw_read_db;
+if($cfg->{FBOX_EXPORT_ENABLED}) { fbox_gen_fritz_xml; }
+if($cfg->{RCUBE_EXPORT_ENABLED}) { rcube_update_address_book; }

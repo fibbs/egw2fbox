@@ -13,16 +13,24 @@ EGW_DBPASS = <db_password>
 # See EGW table egw_addressbook; group ids are negative; user ids are positive
 EGW_ADDRBOOK_OWNERS = <id1>,<id2>
 
-#### stuff for FritzBox
+#### stuff for Fritz Box
+# Enabling Fritz Box export create a XML file the cron jon can upload to the fritz box
+# FBOX_EXPORT_ENABLED = 0|1 # 0 = off ; 1 = on
+FBOX_EXPORT_ENABLED = 1
+# compact_mode creates only one phone book entry if less than 3 phone numbers exist:
+# FBOX_COMPACT_MODE = 0|1 # 0 = off ; 1 = on
+FBOX_COMPACT_MODE = 1
 # for XML generation (Fritzbox)
 FBOX_OUTPUT_XML_FILE = /path/to/phonebook.xml
 # try 16 characters for Siemens Gigaset DECT phones and 18 characters for FritzPhone
 FBOX_TOTAL_NAME_LENGTH = 16
 FBOX_BUSINESS_SUFFIX_STRING = W
 FBOX_PRIVATE_SUFFIX_STRING = P
-# compact_mode creates only one phone book entry if less than 3 phone numbers exist:
-# COMPACT_MODE = 0|1 # 0 = off ; 1 = on
-FBOX_COMPACT_MODE = 1
+
+#### stuff for Round Cube
+# Enabling Round Cube export updates private and business mail addresses to round cube address book
+# RCUBE_EXPORT_ENABLED = 0|1 # 0 = off ; 1 = on
+RCUBE_EXPORT_ENABLED = 0
 
 
 ############################################
