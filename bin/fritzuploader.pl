@@ -23,7 +23,7 @@ use Digest::MD5 qw(md5 md5_hex);
 use Encode;
 use Data::Dumper;
 
-##### use config file instead of command line argiments
+##### use config file instead of command line arguments
 # added config file routine by Kai Ellinger <coding@blicke.de>
 # START modification
 my $cfg;

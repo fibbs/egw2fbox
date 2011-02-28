@@ -29,14 +29,14 @@
 # 0.3.0 2011-02-26 Kai Ellinger <coding@blicke.de>
 #                  - Verbose function:
 #                    * only prints if data was provided
-#                    * avoiding unneccesary verbose function calls
-#                    * avoiding runtime errors due to uninitialized data in verbode mode
+#                    * avoiding unnecessary verbose function calls
+#                    * avoiding runtime errors due to uninitialized data in verbose mode
 #                  - Respect that Fritzbox address book names can only have 25 characters
 #                  - EGW address book to Fritz Box phone book mapping:
 #                    The Fritz Box Phone book knows 3 different telephone number types:
 #                      'work', 'home' and 'mobile'
 #                    Each Fritz Box phone book entry can have up to 3 phone numbers.
-#                    All 1-3 phone numbers can be of same type or differnt types.
+#                    All 1-3 phone numbers can be of same type or different types.
 #                    * Compact mode (if one EGW address has 1-3 phone numbers):
 #                       EGW field tel_work          -> FritzBox field type 'work'
 #                       EGW field tel_cell          -> FritzBox field type 'mobile'
@@ -59,8 +59,8 @@
 #                            most important number is 'work' and the less important is 'home' here.
 #                   - Added EGW DB connect string check
 #                   - All EGW functions have now prefix 'egw_', all Fritz Box functions prefix
-#                     'fbox_' and all Round Cobe functions 'rcube_' to prepare the source for
-#                     adding the roundcube sync.
+#                     'fbox_' and all Round Cube functions 'rcube_' to prepare the source for
+#                     adding the round cube sync.
 #
 # 0.2.0 2011-02-25 Christian Anton <mail@christiananton.de>
 #                  implementing XML-write as an extra function and implementing COMPACT_MODE which
@@ -81,8 +81,8 @@ my $cfg;
 # the maximum number of characters that a Fritz box phone book name can have
 my $FboxMaxLenghtForName = 32;
 # Maybe the code page setting changes based on Fritz Box language settings
-# and must varry for characters other than germany special characters.
-# This variable can be used to specifx the code page used at the exported XML.
+# and must vary for characters other than germany special characters.
+# This variable can be used to specify the code page used at the exported XML.
 my $FboxAsciiCodeTable = "iso-8859-1"; #
 
 my $o_verbose;
