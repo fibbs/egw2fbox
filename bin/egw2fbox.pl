@@ -148,11 +148,14 @@ sub egw_read_db {
 		SELECT
 			`contact_id`,
 			`n_prefix`,
-			`n_fn` ,
-			`tel_work` ,
-			`tel_cell` ,
-			`tel_assistent` ,
-			`tel_home` ,
+			`n_fn`,
+			`n_given`,
+			`n_middle`,
+			`n_family`,
+			`tel_work`,
+			`tel_cell`,
+			`tel_assistent`,
+			`tel_home`,
 			`tel_cell_private`,
 			`tel_other`,
 			`contact_email`,
@@ -375,6 +378,35 @@ EOF
 
 sub rcube_update_address_book {
 	verbose ("updating round cube address book");
+	my $now_timestamp = time();
+#  mysql> describe contacts;
+#  +------------+------------------+------+-----+---------------------+----------------+
+#  | Field      | Type             | Null | Key | Default             | Extra          |
+#  +------------+------------------+------+-----+---------------------+----------------+
+#  | contact_id | int(10) unsigned | NO   | PRI | NULL                | auto_increment | 
+#  | changed    | datetime         | NO   |     | 1000-01-01 00:00:00 |                | 
+#  | del        | tinyint(1)       | NO   |     | 0                   |                | 
+#  | name       | varchar(128)     | NO   |     |                     |                | 
+#  | email      | varchar(255)     | NO   |     | NULL                |                | 
+#  | firstname  | varchar(128)     | NO   |     |                     |                | 
+#  | surname    | varchar(128)     | NO   |     |                     |                | 
+#  | vcard      | text             | YES  |     | NULL                |                | 
+#  | user_id    | int(10) unsigned | NO   | MUL | 0                   |                | 
+#  +------------+------------------+------+-----+---------------------+----------------+
+
+### Round Cube table to EGW table field mapping:
+# contact_id = auto
+# changed = $now_timestamp
+# name = `n_fn` - `n_prefix` + (RCUBE_BUSINESS_SUFFIX_STRING|RCUBE_PRIVATE_SUFFIX_STRING according to type of e-mail address)
+# email = (contact_email|contact_email_home)
+# firstname = n_given + n_middle
+# surname = n_family
+# vcard = null
+# user_id = RCUBE_ADDRBOOK_OWNERS per each value (can be multiple)
+###
+# NOTE: Need to cut strings to place into name, email, firstname, surname
+###
+
 }
 
 #### MAIN

@@ -14,7 +14,7 @@ EGW_DBPASS = <db_password>
 EGW_ADDRBOOK_OWNERS = <id1>,<id2>
 
 #### stuff for Fritz Box
-# Enabling Fritz Box export create a XML file the cron jon can upload to the fritz box
+# Enabling Fritz Box export create a XML file the cronjob can upload to the fritz box
 # FBOX_EXPORT_ENABLED = 0|1 # 0 = off ; 1 = on
 FBOX_EXPORT_ENABLED = 1
 # compact_mode creates only one phone book entry if less than 3 phone numbers exist:
@@ -30,12 +30,17 @@ FBOX_PRIVATE_SUFFIX_STRING = P
 #### stuff for Round Cube
 # Enabling Round Cube export updates private and business mail addresses to round cube address book
 # RCUBE_EXPORT_ENABLED = 0|1 # 0 = off ; 1 = on
-RCUBE_EXPORT_ENABLED = 0
+RCUBE_EXPORT_ENABLED = 1
 RCUBE_DBHOST = 127.0.0.1
 RCUBE_DBPORT = 3306
 RCUBE_DBNAME = roundcubemail
 RCUBE_DBUSER = <db_username>
 RCUBE_DBPASS = <db_password>
+# list of Round Cube users that like to import the e-mail addresses
+# See RoundCube table users field user_id for the right numbers
+RCUBE_ADDRBOOK_OWNERS = <id1>,<id2>
+RCUBE_BUSINESS_SUFFIX_STRING = (work)
+RCUBE_PRIVATE_SUFFIX_STRING = (home)
 
 
 ############################################
