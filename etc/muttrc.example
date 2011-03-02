@@ -1,0 +1,24 @@
+#... to be added to your .muttrc file
+
+#### local mail addresses
+# local mail addresses are independent of the EGW address book
+# they are neither deleted, updated, created nor any other sync action 
+# is done with the EGW address book
+#
+# new addresses can be added to the local address book when pressing key [a]
+# such a address will go to a local address book defined in this file
+set alias_file=~/.mutt_alias
+# load all addresses from local address file
+source ~/.mutt_alias
+
+#### EGW global address book 
+# egw2fbox.pl writes it's own version of a mutt address book into a file
+#
+# because there is no such field like a alias name in the EGW database, the alias field is a counter
+#
+# this file is updated each time egw2fbox.pl is running
+# this file can be loaded each time mutt is started
+#
+# if mutt runs on a different machine, you can create an alias that copies the file before starting mutt
+# $ alias mutt="scp remoteuser@server:/path/to/mutt_egw_addresses ~/.mutt_egw_addresses; mutt; rm ~/.mutt_egw_addresses"
+source ~/.mutt_egw_addresses

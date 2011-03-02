@@ -144,6 +144,73 @@ sub egw_read_db {
 	# convert UTF8 values inside EGW DB to latin1 because Fritz Box expects German characters in iso-8859-1
 	$dbh->do("SET NAMES latin1");  # latin1 is good at least for XML files created with iso-8859-1
 
+	#  mysql> describe egw_addressbook;
+	#  +----------------------+--------------+------+-----+---------+----------------+
+	#  | Field                | Type         | Null | Key | Default | Extra          |
+	#  +----------------------+--------------+------+-----+---------+----------------+
+	#  | contact_id           | int(11)      | NO   | PRI | NULL    | auto_increment | 
+	#  | contact_tid          | varchar(1)   | YES  |     | n       |                | 
+	#  | contact_owner        | bigint(20)   | NO   | MUL | NULL    |                | 
+	#  | contact_private      | tinyint(4)   | YES  |     | 0       |                | 
+	#  | cat_id               | varchar(255) | YES  | MUL | NULL    |                | 
+	#  | n_family             | varchar(64)  | YES  | MUL | NULL    |                | 
+	#  | n_given              | varchar(64)  | YES  | MUL | NULL    |                | 
+	#  | n_middle             | varchar(64)  | YES  |     | NULL    |                | 
+	#  | n_prefix             | varchar(64)  | YES  |     | NULL    |                | 
+	#  | n_suffix             | varchar(64)  | YES  |     | NULL    |                | 
+	#  | n_fn                 | varchar(128) | YES  |     | NULL    |                | 
+	#  | n_fileas             | varchar(255) | YES  | MUL | NULL    |                | 
+	#  | contact_bday         | varchar(12)  | YES  |     | NULL    |                | 
+	#  | org_name             | varchar(128) | YES  | MUL | NULL    |                | 
+	#  | org_unit             | varchar(64)  | YES  |     | NULL    |                | 
+	#  | contact_title        | varchar(64)  | YES  |     | NULL    |                | 
+	#  | contact_role         | varchar(64)  | YES  |     | NULL    |                | 
+	#  | contact_assistent    | varchar(64)  | YES  |     | NULL    |                | 
+	#  | contact_room         | varchar(64)  | YES  |     | NULL    |                | 
+	#  | adr_one_street       | varchar(64)  | YES  |     | NULL    |                | 
+	#  | adr_one_street2      | varchar(64)  | YES  |     | NULL    |                | 
+	#  | adr_one_locality     | varchar(64)  | YES  |     | NULL    |                | 
+	#  | adr_one_region       | varchar(64)  | YES  |     | NULL    |                | 
+	#  | adr_one_postalcode   | varchar(64)  | YES  |     | NULL    |                | 
+	#  | adr_one_countryname  | varchar(64)  | YES  |     | NULL    |                | 
+	#  | contact_label        | text         | YES  |     | NULL    |                | 
+	#  | adr_two_street       | varchar(64)  | YES  |     | NULL    |                | 
+	#  | adr_two_street2      | varchar(64)  | YES  |     | NULL    |                | 
+	#  | adr_two_locality     | varchar(64)  | YES  |     | NULL    |                | 
+	#  | adr_two_region       | varchar(64)  | YES  |     | NULL    |                | 
+	#  | adr_two_postalcode   | varchar(64)  | YES  |     | NULL    |                | 
+	#  | adr_two_countryname  | varchar(64)  | YES  |     | NULL    |                | 
+	#  | tel_work             | varchar(40)  | YES  |     | NULL    |                | 
+	#  | tel_cell             | varchar(40)  | YES  |     | NULL    |                | 
+	#  | tel_fax              | varchar(40)  | YES  |     | NULL    |                | 
+	#  | tel_assistent        | varchar(40)  | YES  |     | NULL    |                | 
+	#  | tel_car              | varchar(40)  | YES  |     | NULL    |                | 
+	#  | tel_pager            | varchar(40)  | YES  |     | NULL    |                | 
+	#  | tel_home             | varchar(40)  | YES  |     | NULL    |                | 
+	#  | tel_fax_home         | varchar(40)  | YES  |     | NULL    |                | 
+	#  | tel_cell_private     | varchar(40)  | YES  |     | NULL    |                | 
+	#  | tel_other            | varchar(40)  | YES  |     | NULL    |                | 
+	#  | tel_prefer           | varchar(32)  | YES  |     | NULL    |                | 
+	#  | contact_email        | varchar(128) | YES  |     | NULL    |                | 
+	#  | contact_email_home   | varchar(128) | YES  |     | NULL    |                | 
+	#  | contact_url          | varchar(128) | YES  |     | NULL    |                | 
+	#  | contact_url_home     | varchar(128) | YES  |     | NULL    |                | 
+	#  | contact_freebusy_uri | varchar(128) | YES  |     | NULL    |                | 
+	#  | contact_calendar_uri | varchar(128) | YES  |     | NULL    |                | 
+	#  | contact_note         | text         | YES  |     | NULL    |                | 
+	#  | contact_tz           | varchar(8)   | YES  |     | NULL    |                | 
+	#  | contact_geo          | varchar(32)  | YES  |     | NULL    |                | 
+	#  | contact_pubkey       | text         | YES  |     | NULL    |                | 
+	#  | contact_created      | bigint(20)   | YES  |     | NULL    |                | 
+	#  | contact_creator      | int(11)      | NO   |     | NULL    |                | 
+	#  | contact_modified     | bigint(20)   | NO   |     | NULL    |                | 
+	#  | contact_modifier     | int(11)      | YES  |     | NULL    |                | 
+	#  | contact_jpegphoto    | longblob     | YES  |     | NULL    |                | 
+	#  | account_id           | int(11)      | YES  | UNI | NULL    |                | 
+	#  | contact_etag         | int(11)      | YES  |     | 0       |                | 
+	#  | contact_uid          | varchar(255) | YES  | MUL | NULL    |                | 
+	#  +----------------------+--------------+------+-----+---------+----------------+
+
 	$sql = "
 		SELECT
 			`contact_id`,
@@ -159,7 +226,8 @@ sub egw_read_db {
 			`tel_cell_private`,
 			`tel_other`,
 			`contact_email`,
-			`contact_email_home`
+			`contact_email_home`,
+			`contact_modified`
 		FROM
 			`egw_addressbook`
 		WHERE
@@ -191,8 +259,8 @@ sub fbox_write_xml_contact {
 	my $contact_name = shift;
 	my $contact_name_suffix = shift;
 	my $numbers_array_ref = shift;
-
-	my $now_timestamp = time();
+  my $now_timestamp = shift;
+	#my $now_timestamp = time();
 	my $name_length;
 	my $output_name;
 
@@ -322,7 +390,7 @@ EOF
 				push @numbers_array, { type=>'home', nr=>$egw_address_data->{$key}->{'tel_other'} };
 			}
 
-			fbox_write_xml_contact($contact_name, '', \@numbers_array);
+			fbox_write_xml_contact($contact_name, '', \@numbers_array, $egw_address_data->{$key}->{'contact_modified'});
 
 		} else {
 
@@ -342,7 +410,7 @@ EOF
 				push @numbers_array, { type=>'mobile', nr=>$egw_address_data->{$key}->{'tel_cell'} };
 				push @numbers_array, { type=>'work',   nr=>$egw_address_data->{$key}->{'tel_assistent'} };
 
-				fbox_write_xml_contact($contact_name, $cfg->{FBOX_BUSINESS_SUFFIX_STRING}, \@numbers_array);
+				fbox_write_xml_contact($contact_name, $cfg->{FBOX_BUSINESS_SUFFIX_STRING}, \@numbers_array, $egw_address_data->{$key}->{'contact_modified'});
 			}
 			# end print the business contact entry
 
@@ -360,7 +428,7 @@ EOF
 				push @numbers_array, { type=>'mobile', nr=>$egw_address_data->{$key}->{'tel_cell_private'} };
 				push @numbers_array, { type=>'work',   nr=>$egw_address_data->{$key}->{'tel_other'} };
 
-				fbox_write_xml_contact($contact_name, $cfg->{FBOX_PRIVATE_SUFFIX_STRING}, \@numbers_array);
+				fbox_write_xml_contact($contact_name, $cfg->{FBOX_PRIVATE_SUFFIX_STRING}, \@numbers_array, $egw_address_data->{$key}->{'contact_modified'});
 			}
 			# end print the business contact entry
 		}
@@ -378,7 +446,8 @@ EOF
 
 sub rcube_update_address_book {
 	verbose ("updating round cube address book");
-	my $now_timestamp = time();
+	## we don't need any more because we have EGW field contact_modified
+	#my $now_timestamp = time();
 #  mysql> describe contacts;
 #  +------------+------------------+------+-----+---------------------+----------------+
 #  | Field      | Type             | Null | Key | Default             | Extra          |
@@ -396,8 +465,8 @@ sub rcube_update_address_book {
 
 ### Round Cube table to EGW table field mapping:
 # contact_id = auto
-# changed = $now_timestamp
-# name = `n_fn` - `n_prefix` + (RCUBE_BUSINESS_SUFFIX_STRING|RCUBE_PRIVATE_SUFFIX_STRING according to type of e-mail address)
+# changed = contact_modified
+# name = n_fn - n_prefix + (RCUBE_BUSINESS_SUFFIX_STRING|RCUBE_PRIVATE_SUFFIX_STRING according to type of e-mail address)
 # email = (contact_email|contact_email_home)
 # firstname = n_given + n_middle
 # surname = n_family
@@ -409,6 +478,46 @@ sub rcube_update_address_book {
 
 }
 
+
+sub mutt_update_address_book {
+	verbose ("updating mutt address book");
+	my $index = 0;
+
+	open (MUTT, ">", $cfg->{MUTT_EXPORT_FILE}) or die "could not open file! $!";
+
+	foreach my $key ( keys(%{$egw_address_data}) ) {
+		
+		# contact name is full contact name - prefix
+		my $contact_name = $egw_address_data->{$key}->{'n_fn'};
+		if ($egw_address_data->{$key}->{'n_prefix'}) {
+			$contact_name =~ s/^$egw_address_data->{$key}->{'n_prefix'}\s*//;
+		}
+
+		# Alias | Name | eMailAdresse |
+		#
+		#alias Maxi Max Mustermann <MaxMustermann@mail.de>
+		#alias SuSE Susi Mustermann <SusiMustermann@mail.de>
+		
+		# this is the business e-mail address
+		if($egw_address_data->{$key}->{'contact_email'}) {
+			$index++;
+			#print MUTT "alias $index $contact_name $cfg->{MUTT_BUSINESS_SUFFIX_STRING} <$egw_address_data->{$key}->{'contact_email'}>\n";
+			printf MUTT "alias %03d %s %s <%s>\n", $index, $contact_name, $cfg->{MUTT_BUSINESS_SUFFIX_STRING},$egw_address_data->{$key}->{'contact_email'};
+		}
+		
+		# this is the private e-mail address
+		if($egw_address_data->{$key}->{'contact_email_home'}) {
+			$index++;
+			printf MUTT "alias %03d %s %s <%s>\n", $index, $contact_name, $cfg->{MUTT_PRIVATE_SUFFIX_STRING},$egw_address_data->{$key}->{'contact_email_home'};
+		}
+
+	}
+	#end: foreach my $key ( keys(%{$egw_address_data}) )
+	
+	close MUTT;
+}
+
+
 #### MAIN
 
 check_args;
@@ -416,3 +525,4 @@ parse_config;
 egw_read_db;
 if($cfg->{FBOX_EXPORT_ENABLED}) { fbox_gen_fritz_xml; }
 if($cfg->{RCUBE_EXPORT_ENABLED}) { rcube_update_address_book; }
+if($cfg->{MUTT_EXPORT_ENABLED}) { mutt_update_address_book; }

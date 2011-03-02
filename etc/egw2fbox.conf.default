@@ -42,6 +42,12 @@ RCUBE_ADDRBOOK_OWNERS = <id1>,<id2>
 RCUBE_BUSINESS_SUFFIX_STRING = (work)
 RCUBE_PRIVATE_SUFFIX_STRING = (home)
 
+#### stuff for Mutt
+MUTT_EXPORT_ENABLED = 1
+MUTT_BUSINESS_SUFFIX_STRING = (work)
+MUTT_PRIVATE_SUFFIX_STRING = (home)
+MUTT_EXPORT_FILE = /path/to/mutt_egw_addresses
+
 
 ############################################
 ### config parameters for fritzuploader.pl
