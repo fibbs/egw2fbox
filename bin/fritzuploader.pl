@@ -15,17 +15,21 @@
 # Portions created by the Initial Developer are Copyright (C) 2009
 # the Initial Developer. All Rights Reserved.
 
-use warnings;
-use strict;
-use LWP;
-use XML::Simple;
-use Digest::MD5 qw(md5 md5_hex);
-use Encode;
-use Data::Dumper;
+use warnings;   # installed by default via permodlib
+use strict;     # installed by default via permodlib
+use LWP;        # not included in permodlib
+use XML::Simple;# not included in permodlib 
+use Digest::MD5 qw(md5 md5_hex); # installed by default via permodlib
+use Encode;     # installed by default via permodlib
+#use Data::Dumper;
 
 ##### use config file instead of command line arguments
 # added config file routine by Kai Ellinger <coding@blicke.de>
 # START modification
+# - we are not using perl module Config::Simple here because it was not installed
+# on our server by default and we saw compile errors when trying to install it via CPAN
+# - we decided to implement our own config file parser to keep the installation simple 
+#   and let the script run with as less dependencies as possible
 my $cfg;
 my $cFile = 'fritzuploader.conf';
 ### fritzuploader.conf example

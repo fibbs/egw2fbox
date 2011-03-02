@@ -26,6 +26,15 @@
 #       MA 02110-1301, USA.
 #
 ### CHANGELOG
+# 0.4.0 2011-03-02 Kai Ellinger <coding@blicke.de>
+#                  - added support for mutt address book including an example file showing 
+#                    how to configure ~/.muttrc to support a local address book and a global
+#                    EGW address book
+#..................- replaced time stamp in fritz box xml with real time stamp from database
+#                    this feature is more interesting for round cube integration where we have
+#                    a time stamp field in the round cube database
+#                  - added some comments
+#
 # 0.3.0 2011-02-26 Kai Ellinger <coding@blicke.de>
 #                  - Verbose function:
 #                    * only prints if data was provided
@@ -69,15 +78,24 @@
 # 0.1.0 2011-02-24 Kai Ellinger <coding@blicke.de>, Christian Anton <mail@christiananton.de>
 #                  Initial version of this script, ready for world domination ;-)
 
-use warnings;
-use strict;
-use Getopt::Long;
-use DBI;
-use Data::Dumper;
-use List::Util qw [min max];
-my $egw_address_data;
+#### modules
+use warnings;     # installed by default via permodlib
+use strict;       # installed by default via permodlib
+use Getopt::Long; # installed by default via permodlib
+use DBI;          # not included in permodlib: DBI and DBI::Mysql needs to be installed if not already done
+use Data::Dumper;            # installed by default via permodlib
+use List::Util qw [min max]; # installed by default via permodlib
+
+#### global variables
+## config
+my $o_verbose;
+my $o_configfile = "egw2fbox.conf";
 my $cfg;
 
+## eGroupware
+my $egw_address_data;
+
+## fritz box
 # the maximum number of characters that a Fritz box phone book name can have
 my $FboxMaxLenghtForName = 32;
 # Maybe the code page setting changes based on Fritz Box language settings
@@ -85,9 +103,8 @@ my $FboxMaxLenghtForName = 32;
 # This variable can be used to specify the code page used at the exported XML.
 my $FboxAsciiCodeTable = "iso-8859-1"; #
 
-my $o_verbose;
-my $o_configfile = "egw2fbox.conf";
 
+#### functions
 sub check_args {
 				Getopt::Long::Configure ("bundling");
 				GetOptions(
@@ -97,6 +114,10 @@ sub check_args {
 }
 
 sub parse_config {
+	# - we are not using perl module Config::Simple here because it was not installed
+	# on our server by default and we saw compile errors when trying to install it via CPAN
+	# - we decided to implement our own config file parser to keep the installation simple 
+	#   and let the script run with as less dependencies as possible
 	open (CONFIG, "$o_configfile") or die "could not open config file: $!";
 
 	while(defined(my $line = <CONFIG>) )
