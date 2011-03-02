@@ -30,7 +30,7 @@
 #                  - added support for mutt address book including an example file showing 
 #                    how to configure ~/.muttrc to support a local address book and a global
 #                    EGW address book
-#..................- replaced time stamp in fritz box xml with real time stamp from database
+#                  - replaced time stamp in fritz box xml with real time stamp from database
 #                    this feature is more interesting for round cube integration where we have
 #                    a time stamp field in the round cube database
 #                  - added some comments
@@ -115,7 +115,7 @@ sub check_args {
 
 sub parse_config {
 	# - we are not using perl module Config::Simple here because it was not installed
-	# on our server by default and we saw compile errors when trying to install it via CPAN
+	#   on our server by default and we saw compile errors when trying to install it via CPAN
 	# - we decided to implement our own config file parser to keep the installation simple 
 	#   and let the script run with as less dependencies as possible
 	open (CONFIG, "$o_configfile") or die "could not open config file: $!";
