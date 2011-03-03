@@ -26,6 +26,13 @@ FBOX_OUTPUT_XML_FILE = /path/to/phonebook.xml
 FBOX_TOTAL_NAME_LENGTH = 16
 FBOX_BUSINESS_SUFFIX_STRING = W
 FBOX_PRIVATE_SUFFIX_STRING = P
+### needed to work around display problems from fritzbox
+FBOX_DELETE_MY_COUNTRY_CODE=0 # 0 = off ; 1 = on
+FBOX_DELETE_MY_AREA_CODE=0 # 0 = off ; 1 = on
+FBOX_INTERNATIONAL_ACCESS_CODE=00
+FBOX_NATIONAL_ACCESS_CODE=0
+FBOX_MY_COUNTRY_CODE=49
+FBOX_MY_AREA_CODE=89
 
 #### stuff for Round Cube
 # Enabling Round Cube export updates private and business mail addresses to round cube address book

@@ -551,7 +551,6 @@ sub mutt_update_address_book {
 
 
 #### MAIN
-
 check_args;
 parse_config;
 egw_read_db();
