@@ -79,12 +79,13 @@
 #                  Initial version of this script, ready for world domination ;-)
 
 #### modules
-use warnings;     # installed by default via permodlib
-use strict;       # installed by default via permodlib
-use Getopt::Long; # installed by default via permodlib
-use DBI;          # not included in permodlib: DBI and DBI::Mysql needs to be installed if not already done
-use Data::Dumper;            # installed by default via permodlib
-use List::Util qw [min max]; # installed by default via permodlib
+use warnings;     # installed by default via perlmodlib
+use strict;       # installed by default via perlmodlib
+use Getopt::Long; # installed by default via perlmodlib
+use DBI;          # not included in perlmodlib: DBI and DBI::Mysql needs to be installed if not already done
+use Data::Dumper;            # installed by default via perlmodlib
+use List::Util qw [min max]; # installed by default via perlmodlib
+use Text::Iconv;  # not included in perlmodlib
 
 #### global variables
 ## config
@@ -161,10 +162,11 @@ sub egw_read_db {
 
 	my $dsn = "dbi:mysql:$cfg->{EGW_DBNAME}:$cfg->{EGW_DBHOST}:$cfg->{EGW_DBPORT}";
 	$dbh = DBI->connect($dsn, $cfg->{EGW_DBUSER}, $cfg->{EGW_DBPASS}) or die "could not connect db: $!";
-	#$dbh->do("SET NAMES utf8");
+	# read database via UTF8; convert in print function if needed
+	$dbh->do("SET NAMES utf8");
 	# convert UTF8 values inside EGW DB to latin1 because Fritz Box expects German characters in iso-8859-1
-	$dbh->do("SET NAMES latin1");  # latin1 is good at least for XML files created with iso-8859-1
-
+	#$dbh->do("SET NAMES latin1");  # latin1 is good at least for XML files created with iso-8859-1
+	
 	#  mysql> describe egw_addressbook;
 	#  +----------------------+--------------+------+-----+---------+----------------+
 	#  | Field                | Type         | Null | Key | Default | Extra          |
@@ -296,7 +298,13 @@ sub fbox_write_xml_contact {
 		$output_name = substr($contact_name,0,$name_length);
 		$output_name =~ s/\s+$//;
 	}
-
+	
+	# convert output name to character encoding as defined in $FboxAsciiCodeTable
+	my $converter = Text::Iconv->new('utf8',$FboxAsciiCodeTable);
+	print "---$output_name---\n";
+	$output_name = $converter->convert($output_name);
+	print "+++$output_name+++\n";
+	
 	# print the top XML wrap for the contact's entry
 	print FRITZXML "<contact>\n<category>0</category>\n<person><realName>$output_name</realName></person>\n";
 	print FRITZXML "<telephony>\n";
@@ -543,7 +551,13 @@ sub mutt_update_address_book {
 
 check_args;
 parse_config;
-egw_read_db;
-if($cfg->{FBOX_EXPORT_ENABLED}) { fbox_gen_fritz_xml; }
-if($cfg->{RCUBE_EXPORT_ENABLED}) { rcube_update_address_book; }
-if($cfg->{MUTT_EXPORT_ENABLED}) { mutt_update_address_book; }
+egw_read_db();
+if($cfg->{FBOX_EXPORT_ENABLED}) { 
+	fbox_gen_fritz_xml; 
+}
+if($cfg->{RCUBE_EXPORT_ENABLED}) { 
+	rcube_update_address_book; 
+}
+if($cfg->{MUTT_EXPORT_ENABLED}) { 
+	mutt_update_address_book; 
+}
