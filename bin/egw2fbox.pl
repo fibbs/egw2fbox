@@ -26,6 +26,11 @@
 #       MA 02110-1301, USA.
 #
 ### CHANGELOG
+# 0.5.0 2011-03-04 Christian Anton <mail@christiananton.de>, Kai Ellinger <coding@blicke.de>
+#                  - data is requested from DB in UTF8 and explicitly converted in desired encoding
+#                    inside of fbox_write_xml_contact function
+#                  - mutt export function now writes aliases file in UTF-8 now. If you use anything
+#                    different - you're wrong!
 # 0.4.0 2011-03-02 Kai Ellinger <coding@blicke.de>
 #                  - added support for mutt address book including an example file showing 
 #                    how to configure ~/.muttrc to support a local address book and a global
