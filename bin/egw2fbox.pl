@@ -290,19 +290,24 @@ sub fbox_write_xml_contact {
 	# reformat name according to max length and suffix
 	if ($contact_name_suffix) {
 		$name_length = min($cfg->{FBOX_TOTAL_NAME_LENGTH},$FboxMaxLenghtForName) - 1 - length($contact_name_suffix);
-		$output_name = substr($contact_name,0,$name_length);
+		#$output_name = substr($contact_name,0,$name_length);
+		$output_name = $contact_name;
 		$output_name =~ s/\s+$//;
 		$output_name = $output_name . " " . $contact_name_suffix;
 	} else {
 		$name_length = min($cfg->{FBOX_TOTAL_NAME_LENGTH},$FboxMaxLenghtForName);
-		$output_name = substr($contact_name,0,$name_length);
+		#$output_name = substr($contact_name,0,$name_length);
+		$output_name = $contact_name;
 		$output_name =~ s/\s+$//;
 	}
 	
 	# convert output name to character encoding as defined in $FboxAsciiCodeTable
 	print "---$output_name---\n";
+	use Text::Iconv;
+  my $converter = Text::Iconv->new("utf-8", $FboxAsciiCodeTable);
+  $output_name = $converter->convert($output_name	);
 	#$output_name = encode($FboxAsciiCodeTable,$output_name);
-	Encode::from_to($output_name, "utf8", $FboxAsciiCodeTable);
+	#Encode::from_to($output_name, "utf8", $FboxAsciiCodeTable);
 	print "+++$output_name+++\n";
 	
 	# print the top XML wrap for the contact's entry
