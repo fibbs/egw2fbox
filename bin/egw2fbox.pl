@@ -31,6 +31,10 @@
 #                    inside of fbox_write_xml_contact function
 #                  - mutt export function now writes aliases file in UTF-8 now. If you use anything
 #                    different - you're wrong!
+#                  - fixed bug: for private contact entries in FritzBox the home number was taken from
+#                    database field tel_work instead of tel_home
+#                  - extended fbox_reformatTelNr to support local phone number annotation to work around
+#                    inability of FritzBox to rewrite phone number for incoming calls
 # 0.4.0 2011-03-02 Kai Ellinger <coding@blicke.de>
 #                  - added support for mutt address book including an example file showing 
 #                    how to configure ~/.muttrc to support a local address book and a global
@@ -275,12 +279,52 @@ sub egw_read_db {
 }
 
 sub fbox_reformatTelNr {
-	my $Nr = shift;
+        my $nr = shift;
 
-	$Nr =~ s/^\+/00/;
-	$Nr =~ s/[^\d]+//g;
+        # this function will most likely _not_ work in countries using the north american numbering plan
+        # if you use a FritzBox in one of these states, fix this function and submit changes to us
+        # http://en.wikipedia.org/wiki/North_American_Numbering_Plan
 
-	return $Nr;
+        # first rewrite all phone numbers to international format: 
+        # 004912345678 (where 00 is FBOX_INTERNATIONAL_ACCESS_CODE)
+        $nr =~ s/^\+/$cfg->{FBOX_INTERNATIONAL_ACCESS_CODE}/;
+
+        # dele all non-decimals
+        $nr =~ s/[^\d]+//g;
+
+        # change national numbers starting with FBOX_NATIONAL_ACCESS_CODE + FBOX_MY_AREA_CODE to the same 
+        # format (i.e. 08935350 -> 004935350)
+        if(!($nr =~ /^$cfg->{FBOX_INTERNATIONAL_ACCESS_CODE}/) && ($nr =~ /^$cfg->{FBOX_NATIONAL_ACCESS_CODE}/) ) {
+                $nr =~  s/^$cfg->{FBOX_NATIONAL_ACCESS_CODE}/$cfg->{FBOX_INTERNATIONAL_ACCESS_CODE}$cfg->{FBOX_MY_COUNTRY_CODE}/;
+        }
+
+        # change all local numbers NOT starting with FBOX_INTERNATIONAL_ACCESS_CODE to be in the same format
+        # i.e. 12345 -> 00498912345
+        if(!($nr =~ /^$cfg->{FBOX_INTERNATIONAL_ACCESS_CODE}/) ) {
+                $nr =~ s/^/$cfg->{FBOX_INTERNATIONAL_ACCESS_CODE}$cfg->{FBOX_MY_COUNTRY_CODE}$cfg->{FBOX_MY_AREA_CODE}/;
+        }
+
+
+
+	# from here on we have universal peace! All phone numbers are in same format!
+	# depending on configuration options we reformat numbers now to ensure that FritzBox can resolve phone numbers
+	# of incoming calls to real names
+
+	if ($cfg->{FBOX_DELETE_MY_COUNTRY_CODE}) {
+
+		# numbers of my area
+		if ($cfg->{FBOX_DELETE_MY_AREA_CODE}) {
+		
+			$nr =~ s/^$cfg->{FBOX_INTERNATIONAL_ACCESS_CODE}$cfg->{FBOX_MY_COUNTRY_CODE}$cfg->{FBOX_MY_AREA_CODE}//;
+
+		}
+
+		# numbers of my country
+		$nr =~ s/^$cfg->{FBOX_INTERNATIONAL_ACCESS_CODE}$cfg->{FBOX_MY_COUNTRY_CODE}/$cfg->{FBOX_NATIONAL_ACCESS_CODE}/;
+	}
+	
+
+        return $nr;
 }
 
 sub fbox_write_xml_contact {
@@ -456,7 +500,7 @@ EOF
 				verbose ("  start writing the private contact entry");
 				my @numbers_array;
 
-				push @numbers_array, { type=>'home',   nr=>$egw_address_data->{$key}->{'tel_work'} };
+				push @numbers_array, { type=>'home',   nr=>$egw_address_data->{$key}->{'tel_home'} };
 				push @numbers_array, { type=>'mobile', nr=>$egw_address_data->{$key}->{'tel_cell_private'} };
 				push @numbers_array, { type=>'work',   nr=>$egw_address_data->{$key}->{'tel_other'} };
 
