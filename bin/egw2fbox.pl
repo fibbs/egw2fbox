@@ -85,7 +85,7 @@ use Getopt::Long; # installed by default via perlmodlib
 use DBI;          # not included in perlmodlib: DBI and DBI::Mysql needs to be installed if not already done
 use Data::Dumper;            # installed by default via perlmodlib
 use List::Util qw [min max]; # installed by default via perlmodlib
-use Text::Iconv;  # not included in perlmodlib
+use Encode;       # installed by default via perlmodlib
 
 #### global variables
 ## config
@@ -300,9 +300,9 @@ sub fbox_write_xml_contact {
 	}
 	
 	# convert output name to character encoding as defined in $FboxAsciiCodeTable
-	my $converter = Text::Iconv->new('utf8',$FboxAsciiCodeTable);
 	print "---$output_name---\n";
-	$output_name = $converter->convert($output_name);
+	#$output_name = encode($FboxAsciiCodeTable,$output_name);
+	Encode::from_to($output_name, "utf8", $FboxAsciiCodeTable);
 	print "+++$output_name+++\n";
 	
 	# print the top XML wrap for the contact's entry

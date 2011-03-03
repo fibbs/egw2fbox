@@ -15,12 +15,12 @@
 # Portions created by the Initial Developer are Copyright (C) 2009
 # the Initial Developer. All Rights Reserved.
 
-use warnings;   # installed by default via permodlib
-use strict;     # installed by default via permodlib
-use LWP;        # not included in permodlib
-use XML::Simple;# not included in permodlib 
-use Digest::MD5 qw(md5 md5_hex); # installed by default via permodlib
-use Encode;     # installed by default via permodlib
+use warnings;   # installed by default via perlmodlib
+use strict;     # installed by default via perlmodlib
+use LWP;        # not included in perlmodlib
+use XML::Simple;# not included in perlmodlib 
+use Digest::MD5 qw(md5 md5_hex); # installed by default via perlmodlib
+use Encode;     # installed by default via perlmodlib
 #use Data::Dumper;
 
 ##### use config file instead of command line arguments
