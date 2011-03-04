@@ -26,6 +26,9 @@
 #       MA 02110-1301, USA.
 #
 ### CHANGELOG
+# 0.5.1 2011-03-04 Christian Anton <mail@christiananton.de>
+#                  - tidy up code to fulfill Perl::Critic tests at "gentle" severity:
+#                    http://www.perlcritic.org/
 # 0.5.0 2011-03-04 Christian Anton <mail@christiananton.de>, Kai Ellinger <coding@blicke.de>
 #                  - data is requested from DB in UTF8 and explicitly converted in desired encoding
 #                    inside of fbox_write_xml_contact function
@@ -113,6 +116,8 @@ my $FboxMaxLenghtForName = 32;
 # This variable can be used to specify the code page used at the exported XML.
 my $FboxAsciiCodeTable = "iso-8859-1"; #
 
+# make file descriptor for XML output file global
+my $FRITZXML;
 
 #### functions
 sub check_args {
@@ -128,9 +133,9 @@ sub parse_config {
 	#   on our server by default and we saw compile errors when trying to install it via CPAN
 	# - we decided to implement our own config file parser to keep the installation simple 
 	#   and let the script run with as less dependencies as possible
-	open (CONFIG, "$o_configfile") or die "could not open config file: $!";
+	open (my $CFGFILE, '<', "$o_configfile") or die "could not open config file: $!";
 
-	while(defined(my $line = <CONFIG>) )
+	while(defined(my $line = <$CFGFILE>) )
 	{
 		chomp $line;
 		$line =~ s/#.*//g;
@@ -143,7 +148,7 @@ sub parse_config {
 
 		$cfg->{$key} = $value;
 	}
-	close CONFIG;
+	close $CFGFILE;
 
 }
 
@@ -353,22 +358,22 @@ sub fbox_write_xml_contact {
 	}
 	
 	# print the top XML wrap for the contact's entry
-	print FRITZXML "<contact>\n<category>0</category>\n<person><realName>$output_name</realName></person>\n";
-	print FRITZXML "<telephony>\n";
+	print $FRITZXML "<contact>\n<category>0</category>\n<person><realName>$output_name</realName></person>\n";
+	print $FRITZXML "<telephony>\n";
 
 	foreach my $numbers_entry_ref (@$numbers_array_ref) {
 		# not defined values causing runtime errors
 		$o_verbose && verbose ("   type: ". ($numbers_entry_ref->{'type'} || "<undefined>") . " , number: ". ($numbers_entry_ref->{'nr'}|| "<undefined>")  );
 		if ($$numbers_entry_ref{'nr'}) {
-			print FRITZXML "<number type=\"$$numbers_entry_ref{'type'}\" vanity=\"\" prio=\"0\">" .
+			print $FRITZXML "<number type=\"$$numbers_entry_ref{'type'}\" vanity=\"\" prio=\"0\">" .
 							 fbox_reformatTelNr($$numbers_entry_ref{'nr'}) .
 							 "</number>\n";
 		}
 	}
 
 	# print the bottom XML wrap for the contact's entry
-	print FRITZXML "</telephony>\n";
-	print FRITZXML "<services /><setup /><mod_time>$now_timestamp</mod_time></contact>";
+	print $FRITZXML "</telephony>\n";
+	print $FRITZXML "<services /><setup /><mod_time>$now_timestamp</mod_time></contact>";
 }
 
 sub fbox_count_contacts_numbers {
@@ -388,8 +393,8 @@ sub fbox_count_contacts_numbers {
 sub fbox_gen_fritz_xml {
 	my $now_timestamp = time();
 
-	open (FRITZXML, ">", $cfg->{FBOX_OUTPUT_XML_FILE}) or die "could not open file! $!";
-	print FRITZXML <<EOF;
+	open ($FRITZXML, '>', $cfg->{FBOX_OUTPUT_XML_FILE}) or die "could not open file! $!";
+	print $FRITZXML <<EOF;
 <?xml version="1.0" encoding="${FboxAsciiCodeTable}"?>
 <phonebooks>
 <phonebook name="Telefonbuch">
@@ -513,11 +518,11 @@ EOF
 	## end iterate
 
 
-	print FRITZXML <<EOF;
+	print $FRITZXML <<EOF;
 </phonebook>
 </phonebooks>
 EOF
-	close FRITZXML;
+	close $FRITZXML;
 }
 
 sub rcube_update_address_book {
@@ -559,7 +564,7 @@ sub mutt_update_address_book {
 	verbose ("updating mutt address book");
 	my $index = 0;
 
-	open (MUTT, ">", $cfg->{MUTT_EXPORT_FILE}) or die "could not open file! $!";
+	open (my $MUTT, ">", $cfg->{MUTT_EXPORT_FILE}) or die "could not open file! $!";
 
 	foreach my $key ( keys(%{$egw_address_data}) ) {
 		
@@ -577,20 +582,19 @@ sub mutt_update_address_book {
 		# this is the business e-mail address
 		if($egw_address_data->{$key}->{'contact_email'}) {
 			$index++;
-			#print MUTT "alias $index $contact_name $cfg->{MUTT_BUSINESS_SUFFIX_STRING} <$egw_address_data->{$key}->{'contact_email'}>\n";
-			printf MUTT "alias %03d %s %s <%s>\n", $index, $contact_name, $cfg->{MUTT_BUSINESS_SUFFIX_STRING},$egw_address_data->{$key}->{'contact_email'};
+			printf $MUTT "alias %03d %s %s <%s>\n", $index, $contact_name, $cfg->{MUTT_BUSINESS_SUFFIX_STRING},$egw_address_data->{$key}->{'contact_email'};
 		}
 		
 		# this is the private e-mail address
 		if($egw_address_data->{$key}->{'contact_email_home'}) {
 			$index++;
-			printf MUTT "alias %03d %s %s <%s>\n", $index, $contact_name, $cfg->{MUTT_PRIVATE_SUFFIX_STRING},$egw_address_data->{$key}->{'contact_email_home'};
+			printf $MUTT "alias %03d %s %s <%s>\n", $index, $contact_name, $cfg->{MUTT_PRIVATE_SUFFIX_STRING},$egw_address_data->{$key}->{'contact_email_home'};
 		}
 
 	}
 	#end: foreach my $key ( keys(%{$egw_address_data}) )
 	
-	close MUTT;
+	close $MUTT;
 }
 
 
