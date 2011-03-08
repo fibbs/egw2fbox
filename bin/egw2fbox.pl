@@ -30,6 +30,7 @@
 # 0.5.2 2011-03-08 Kai Ellinger <coding@blicke.de>
 #                  - started implementing round cube address book sync because I feel it is urgent ;-)
 #                    did not touch any SQL code, need to update all TODOs with inserting SQL code
+#                  - remove need for $FRITZXML being a global variable
 #
 # 0.5.1 2011-03-04 Christian Anton <mail@christiananton.de>
 #                  - tidy up code to fulfill Perl::Critic tests at "gentle" severity:
@@ -115,7 +116,7 @@ my $cfg;
 ## eGroupware
 my $egw_address_data;
 
-## fritz box
+## fritz box config parameters we don't like to be modified without thinking
 # the maximum number of characters that a Fritz box phone book name can have
 my $FboxMaxLenghtForName = 32;
 # Maybe the code page setting changes based on Fritz Box language settings
@@ -123,8 +124,6 @@ my $FboxMaxLenghtForName = 32;
 # This variable can be used to specify the code page used at the exported XML.
 my $FboxAsciiCodeTable = "iso-8859-1"; #
 
-# make file descriptor for XML output file global
-my $FRITZXML;
 
 #### functions
 sub check_args {
@@ -291,32 +290,30 @@ sub egw_read_db {
 }
 
 sub fbox_reformatTelNr {
-        my $nr = shift;
+	my $nr = shift;
 
-        # this function will most likely _not_ work in countries using the north american numbering plan
-        # if you use a FritzBox in one of these states, fix this function and submit changes to us
-        # http://en.wikipedia.org/wiki/North_American_Numbering_Plan
+	# this function will most likely _not_ work in countries using the north american numbering plan
+	# if you use a FritzBox in one of these states, fix this function and submit changes to us
+	# http://en.wikipedia.org/wiki/North_American_Numbering_Plan
 
-        # first rewrite all phone numbers to international format: 
-        # 004912345678 (where 00 is FBOX_INTERNATIONAL_ACCESS_CODE)
-        $nr =~ s/^\+/$cfg->{FBOX_INTERNATIONAL_ACCESS_CODE}/;
+	# first rewrite all phone numbers to international format: 
+	# 004912345678 (where 00 is FBOX_INTERNATIONAL_ACCESS_CODE)
+	$nr =~ s/^\+/$cfg->{FBOX_INTERNATIONAL_ACCESS_CODE}/;
 
-        # dele all non-decimals
-        $nr =~ s/[^\d]+//g;
+	# dele all non-decimals
+	$nr =~ s/[^\d]+//g;
 
-        # change national numbers starting with FBOX_NATIONAL_ACCESS_CODE + FBOX_MY_AREA_CODE to the same 
-        # format (i.e. 08935350 -> 004935350)
-        if(!($nr =~ /^$cfg->{FBOX_INTERNATIONAL_ACCESS_CODE}/) && ($nr =~ /^$cfg->{FBOX_NATIONAL_ACCESS_CODE}/) ) {
-                $nr =~  s/^$cfg->{FBOX_NATIONAL_ACCESS_CODE}/$cfg->{FBOX_INTERNATIONAL_ACCESS_CODE}$cfg->{FBOX_MY_COUNTRY_CODE}/;
-        }
+	# change national numbers starting with FBOX_NATIONAL_ACCESS_CODE + FBOX_MY_AREA_CODE to the same 
+	# format (i.e. 08935350 -> 004935350)
+	if(!($nr =~ /^$cfg->{FBOX_INTERNATIONAL_ACCESS_CODE}/) && ($nr =~ /^$cfg->{FBOX_NATIONAL_ACCESS_CODE}/) ) {
+		$nr =~  s/^$cfg->{FBOX_NATIONAL_ACCESS_CODE}/$cfg->{FBOX_INTERNATIONAL_ACCESS_CODE}$cfg->{FBOX_MY_COUNTRY_CODE}/;
+	}
 
-        # change all local numbers NOT starting with FBOX_INTERNATIONAL_ACCESS_CODE to be in the same format
-        # i.e. 12345 -> 00498912345
-        if(!($nr =~ /^$cfg->{FBOX_INTERNATIONAL_ACCESS_CODE}/) ) {
-                $nr =~ s/^/$cfg->{FBOX_INTERNATIONAL_ACCESS_CODE}$cfg->{FBOX_MY_COUNTRY_CODE}$cfg->{FBOX_MY_AREA_CODE}/;
-        }
-
-
+	# change all local numbers NOT starting with FBOX_INTERNATIONAL_ACCESS_CODE to be in the same format
+	# i.e. 12345 -> 00498912345
+	if(!($nr =~ /^$cfg->{FBOX_INTERNATIONAL_ACCESS_CODE}/) ) {
+		$nr =~ s/^/$cfg->{FBOX_INTERNATIONAL_ACCESS_CODE}$cfg->{FBOX_MY_COUNTRY_CODE}$cfg->{FBOX_MY_AREA_CODE}/;
+	}
 
 	# from here on we have universal peace! All phone numbers are in same format!
 	# depending on configuration options we reformat numbers now to ensure that FritzBox can resolve phone numbers
@@ -326,9 +323,7 @@ sub fbox_reformatTelNr {
 
 		# numbers of my area
 		if ($cfg->{FBOX_DELETE_MY_AREA_CODE}) {
-		
 			$nr =~ s/^$cfg->{FBOX_INTERNATIONAL_ACCESS_CODE}$cfg->{FBOX_MY_COUNTRY_CODE}$cfg->{FBOX_MY_AREA_CODE}//;
-
 		}
 
 		# numbers of my country
@@ -340,6 +335,7 @@ sub fbox_reformatTelNr {
 }
 
 sub fbox_write_xml_contact {
+	my $FRITZXML = shift;
 	my $contact_name = shift;
 	my $contact_name_suffix = shift;
 	my $numbers_array_ref = shift;
@@ -373,8 +369,8 @@ sub fbox_write_xml_contact {
 		$o_verbose && verbose ("   type: ". ($numbers_entry_ref->{'type'} || "<undefined>") . " , number: ". ($numbers_entry_ref->{'nr'}|| "<undefined>")  );
 		if ($$numbers_entry_ref{'nr'}) {
 			print $FRITZXML "<number type=\"$$numbers_entry_ref{'type'}\" vanity=\"\" prio=\"0\">" .
-							 fbox_reformatTelNr($$numbers_entry_ref{'nr'}) .
-							 "</number>\n";
+				fbox_reformatTelNr($$numbers_entry_ref{'nr'}) .
+				"</number>\n";
 		}
 	}
 
@@ -400,6 +396,10 @@ sub fbox_count_contacts_numbers {
 sub fbox_gen_fritz_xml {
 	my $now_timestamp = time();
 
+	# make file descriptor for XML output file global
+	my $FRITZXML;
+	
+	# open file
 	open ($FRITZXML, '>', $cfg->{FBOX_OUTPUT_XML_FILE}) or die "could not open file! $!";
 	print $FRITZXML <<EOF;
 <?xml version="1.0" encoding="${FboxAsciiCodeTable}"?>
@@ -478,7 +478,7 @@ EOF
 				push @numbers_array, { type=>'home', nr=>$egw_address_data->{$key}->{'tel_other'} };
 			}
 
-			fbox_write_xml_contact($contact_name, '', \@numbers_array, $egw_address_data->{$key}->{'contact_modified'});
+			fbox_write_xml_contact($FRITZXML, $contact_name, '', \@numbers_array, $egw_address_data->{$key}->{'contact_modified'});
 
 		} else {
 
@@ -498,7 +498,7 @@ EOF
 				push @numbers_array, { type=>'mobile', nr=>$egw_address_data->{$key}->{'tel_cell'} };
 				push @numbers_array, { type=>'work',   nr=>$egw_address_data->{$key}->{'tel_assistent'} };
 
-				fbox_write_xml_contact($contact_name, $cfg->{FBOX_BUSINESS_SUFFIX_STRING}, \@numbers_array, $egw_address_data->{$key}->{'contact_modified'});
+				fbox_write_xml_contact($FRITZXML, $contact_name, $cfg->{FBOX_BUSINESS_SUFFIX_STRING}, \@numbers_array, $egw_address_data->{$key}->{'contact_modified'});
 			}
 			# end print the business contact entry
 
@@ -507,7 +507,7 @@ EOF
 				($egw_address_data->{$key}->{'tel_home'}) ||
 				($egw_address_data->{$key}->{'tel_cell_private'}) ||
 				($egw_address_data->{$key}->{'tel_other'})
-			 ) {
+			) {
 
 				verbose ("  start writing the private contact entry");
 				my @numbers_array;
@@ -516,7 +516,7 @@ EOF
 				push @numbers_array, { type=>'mobile', nr=>$egw_address_data->{$key}->{'tel_cell_private'} };
 				push @numbers_array, { type=>'work',   nr=>$egw_address_data->{$key}->{'tel_other'} };
 
-				fbox_write_xml_contact($contact_name, $cfg->{FBOX_PRIVATE_SUFFIX_STRING}, \@numbers_array, $egw_address_data->{$key}->{'contact_modified'});
+				fbox_write_xml_contact($FRITZXML, $contact_name, $cfg->{FBOX_PRIVATE_SUFFIX_STRING}, \@numbers_array, $egw_address_data->{$key}->{'contact_modified'});
 			}
 			# end print the business contact entry
 		}
