@@ -26,9 +26,15 @@
 #       MA 02110-1301, USA.
 #
 ### CHANGELOG
+#
+# 0.5.2 2011-03-08 Kai Ellinger <coding@blicke.de>
+#                  - started implementing round cube address book sync because I feel it is urgent ;-)
+#                    did not touch any SQL code, need to update all TODOs with inserting SQL code
+#
 # 0.5.1 2011-03-04 Christian Anton <mail@christiananton.de>
 #                  - tidy up code to fulfill Perl::Critic tests at "gentle" severity:
 #                    http://www.perlcritic.org/
+#
 # 0.5.0 2011-03-04 Christian Anton <mail@christiananton.de>, Kai Ellinger <coding@blicke.de>
 #                  - data is requested from DB in UTF8 and explicitly converted in desired encoding
 #                    inside of fbox_write_xml_contact function
@@ -38,6 +44,7 @@
 #                    database field tel_work instead of tel_home
 #                  - extended fbox_reformatTelNr to support local phone number annotation to work around
 #                    inability of FritzBox to rewrite phone number for incoming calls
+#
 # 0.4.0 2011-03-02 Kai Ellinger <coding@blicke.de>
 #                  - added support for mutt address book including an example file showing 
 #                    how to configure ~/.muttrc to support a local address book and a global
@@ -329,7 +336,7 @@ sub fbox_reformatTelNr {
 	}
 	
 
-        return $nr;
+	return $nr;
 }
 
 sub fbox_write_xml_contact {
@@ -527,36 +534,126 @@ EOF
 
 sub rcube_update_address_book {
 	verbose ("updating round cube address book");
+	my $dbh;
+	my $sql; # the SQL statement should use bind variables for better performance
+	my $sth;
+	
 	## we don't need any more because we have EGW field contact_modified
 	#my $now_timestamp = time();
-#  mysql> describe contacts;
-#  +------------+------------------+------+-----+---------------------+----------------+
-#  | Field      | Type             | Null | Key | Default             | Extra          |
-#  +------------+------------------+------+-----+---------------------+----------------+
-#  | contact_id | int(10) unsigned | NO   | PRI | NULL                | auto_increment | 
-#  | changed    | datetime         | NO   |     | 1000-01-01 00:00:00 |                | 
-#  | del        | tinyint(1)       | NO   |     | 0                   |                | 
-#  | name       | varchar(128)     | NO   |     |                     |                | 
-#  | email      | varchar(255)     | NO   |     | NULL                |                | 
-#  | firstname  | varchar(128)     | NO   |     |                     |                | 
-#  | surname    | varchar(128)     | NO   |     |                     |                | 
-#  | vcard      | text             | YES  |     | NULL                |                | 
-#  | user_id    | int(10) unsigned | NO   | MUL | 0                   |                | 
-#  +------------+------------------+------+-----+---------------------+----------------+
+	#  mysql> describe contacts;
+	#  +------------+------------------+------+-----+---------------------+----------------+
+	#  | Field      | Type             | Null | Key | Default             | Extra          |
+	#  +------------+------------------+------+-----+---------------------+----------------+
+	#  | contact_id | int(10) unsigned | NO   | PRI | NULL                | auto_increment | 
+	#  | changed    | datetime         | NO   |     | 1000-01-01 00:00:00 |                | 
+	#  | del        | tinyint(1)       | NO   |     | 0                   |                | 
+	#  | name       | varchar(128)     | NO   |     |                     |                | 
+	#  | email      | varchar(255)     | NO   |     | NULL                |                | 
+	#  | firstname  | varchar(128)     | NO   |     |                     |                | 
+	#  | surname    | varchar(128)     | NO   |     |                     |                | 
+	#  | vcard      | text             | YES  |     | NULL                |                | 
+	#  | user_id    | int(10) unsigned | NO   | MUL | 0                   |                | 
+	#  +------------+------------------+------+-----+---------------------+----------------+
+	### Round Cube table to EGW table field mapping:
+	# contact_id = auto
+	# changed = contact_modified
+	# name = n_fn - n_prefix + (RCUBE_BUSINESS_SUFFIX_STRING|RCUBE_PRIVATE_SUFFIX_STRING according to type of e-mail address)
+	# email = (contact_email|contact_email_home)
+	# firstname = n_given + n_middle
+	# surname = n_family
+	# vcard = null
+	# user_id = RCUBE_ADDRBOOK_OWNERS per each value (can be multiple)
+	###
+	# NOTE: Need to cut strings to place into name, email, firstname, surname
+	###
+	
+	# TODO - connect to the RCUBE database
+	
+	# Delete old contacts for specified users
+	foreach my $userId ( split(',', $cfg->{RCUBE_ADDRBOOK_OWNERS} ) ) {
+		# TODO - SQL DELETE FROM `contacts` WHERE `user_id` = $userId
+	}
+	
+	# Insert contact details for contacts having mail addresses specified
+	foreach my $key ( keys(%{$egw_address_data}) ) {
+		my $contact_name = $egw_address_data->{$key}->{'n_fn'};
+		verbose ("generating rcube address book for contact $contact_name");
+		
+		# if there is a prefix such as Mr, Mrs, Herr Frau, remove it
+		if ($egw_address_data->{$key}->{'n_prefix'}) {
+			$contact_name =~ s/^$egw_address_data->{$key}->{'n_prefix'}\s*//;
+		}
+		
+		# if first name exists
+		my $first_name = "";
+		if($egw_address_data->{$key}->{'n_given'}) { $first_name = $egw_address_data->{$key}->{'n_given'}; }
+		if($egw_address_data->{$key}->{'n_middle'}) { $first_name = " " . $egw_address_data->{$key}->{'n_middle'}; }
+			
+		# each round cube user has his own address book
+		foreach my $userId ( split(',', $cfg->{RCUBE_ADDRBOOK_OWNERS}) ) {
+		
+			# the business e-mail address
+			if($egw_address_data->{$key}->{'contact_email'}) {
+				my $full_name = $contact_name;
+				# if suffix exists
+				if($cfg->{RCUBE_BUSINESS_SUFFIX_STRING}) { $full_name .= " " . $cfg->{RCUBE_BUSINESS_SUFFIX_STRING}; }
+				rcube_insert_address(
+					$sth,
+					$egw_address_data->{$key}->{'contact_email'},
+					$full_name,
+					$first_name,
+					$egw_address_data->{$key}->{'n_family'},
+					$userId,
+					$egw_address_data->{$key}->{'contact_modified'}
+				);
+			}
+			
+			# the private e-mail address
+			if($egw_address_data->{$key}->{'contact_email_home'}) {
+				my $full_name = $contact_name;
+				# if suffix exists
+				if($cfg->{RCUBE_PRIVATE_SUFFIX_STRING}) { $full_name .= " " . $cfg->{RCUBE_PRIVATE_SUFFIX_STRING}; }
+				rcube_insert_address(
+					$sth,
+					$egw_address_data->{$key}->{'contact_email_home'},
+					$full_name,
+					$first_name,
+					$egw_address_data->{$key}->{'n_family'},
+					$userId,
+					$egw_address_data->{$key}->{'contact_modified'}
+				);
+			}
+		} #END: foreach my $userId ( split(',',) $cfg->{RCUBE_ADDRBOOK_OWNERS} )
+		
+		
+	} # END: foreach my $key ( keys(%{$egw_address_data}) )
+	
+	# TODO - close RCUBE database
+}
 
-### Round Cube table to EGW table field mapping:
-# contact_id = auto
-# changed = contact_modified
-# name = n_fn - n_prefix + (RCUBE_BUSINESS_SUFFIX_STRING|RCUBE_PRIVATE_SUFFIX_STRING according to type of e-mail address)
-# email = (contact_email|contact_email_home)
-# firstname = n_given + n_middle
-# surname = n_family
-# vcard = null
-# user_id = RCUBE_ADDRBOOK_OWNERS per each value (can be multiple)
-###
-# NOTE: Need to cut strings to place into name, email, firstname, surname
-###
 
+sub rcube_insert_address() {
+		my $sth       = shift;
+		my $email     = shift;
+		my $name      = shift;
+		my $firstName = shift;
+		my $familyName= shift;
+		my $userId    = shift;
+		my $changed   = shift;
+
+		verbose ("INSERT data for: rcube RQ user id '$userId' contact '$name' mail '$email'");
+		
+		# TODO - check field size before inserting anyhing into table
+		
+		# TODO insert into table; use the already prepared statement $sth and insert the values via bind variables
+		# See DBI - http://search.cpan.org/~timb/DBI-1.616/DBI.pm
+		# Example: 
+		# $sth = $dbh->prepare("SELECT foo, bar FROM table WHERE baz=?"); # in rcube_update_address_book
+		# $sth->execute( $baz ); # in rcube_insert_address
+		
+		# INSERT INTO `contacts` (`email`, `name`, `firstname`, `surname`, `user_id`, `changed`)
+		# VALUES ($email, $name, $firstName, $familyName, $userId, $changed)
+		
 }
 
 
