@@ -170,8 +170,6 @@ sub egw_read_db {
 	my $sth;
 	my $sql;
 
-	my @res;
-
 	# default values for DB connect
 	if (!$cfg->{EGW_DBHOST}) { $cfg->{EGW_DBHOST} = 'localhost'; }
 	if (!$cfg->{EGW_DBPORT}) { $cfg->{EGW_DBPORT} = 3306; }
@@ -708,3 +706,8 @@ if($cfg->{RCUBE_EXPORT_ENABLED}) {
 if($cfg->{MUTT_EXPORT_ENABLED}) { 
 	mutt_update_address_book; 
 }
+
+# TODO - code reviewing 'rcube_update_address_book' and 'egw_read_db': what is the proper way via DBI to close a database handle, sql statement and result set at the time it is not needed any more?
+# If there is a correct way to do it, we should do to free DB resources as soon as possible.
+
+
