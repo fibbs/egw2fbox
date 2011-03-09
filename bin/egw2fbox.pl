@@ -602,7 +602,7 @@ sub rcube_update_address_book {
 		# perldoc of DBI recommends a new handle for each SQL statement
 		my $sth4delete = $dbh->prepare("DELETE FROM `contacts` WHERE `user_id` IN (?)");
 		foreach my $userId ( split(',', $cfg->{RCUBE_ADDRBOOK_OWNERS} ) ) {
-			verbose "rcube_update_address_book() Deleting RCUBE addresses for user id: -$userId-";
+			$o_verbose && verbose "rcube_update_address_book() Deleting RCUBE addresses for user id: -$userId-";
 			verbose "rcube_update_address_book() Returning: " . $sth4delete->execute( $userId );
 		}
 
@@ -691,7 +691,7 @@ sub rcube_insert_mail_address() {
 		my $userId    = shift;
 		my $changed   = shift;
 
-		verbose ("rcube_insert_mail_address() RQ user id '$userId' contact '$name' mail '$email'");
+		$o_verbose && verbose ("rcube_insert_mail_address() RQ user id '$userId' contact '$name' mail '$email'");
 		
 		# TODO - check field size before inserting anything into table
 		
@@ -701,7 +701,7 @@ sub rcube_insert_mail_address() {
 		# SQL INSERT statement execution
 		# INSERT INTO `contacts` (`email`, `name`, `firstname`, `surname`, `user_id`, `changed`)
 		# VALUES ($email, $name, $firstName, $familyName, $userId, $changed)
-		verbose "rcube_insert_mail_address() SQL INSERT INTO `contacts` (`email`, `name`, `firstname`, `surname`, `user_id`, `changed`) VALUES ($email, $name, $firstName, $familyName, $userId, $changed)";
+		$o_verbose && verbose "rcube_insert_mail_address() SQL INSERT INTO `contacts` (`email`, `name`, `firstname`, `surname`, `user_id`, `changed`) VALUES ($email, $name, $firstName, $familyName, $userId, $changed)";
 		verbose "rcube_insert_mail_address() Returning: " . $sth->execute($email, $name, $firstName, $familyName, $userId, $changed);
 		
 }
