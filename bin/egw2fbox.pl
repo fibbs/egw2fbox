@@ -285,6 +285,9 @@ sub egw_read_db {
 	verbose("found $amountData data rows in egw addr book");
 
 	die "no data for owner(s) $cfg->{ADDRBOOK_OWNERS} found" if ( 0 == $amountData );
+
+	# Disconnect from DB
+	$dbh->disconnect or warn "error diconnecting from EGW database: " . $dbh->errstr;
 }
 
 sub fbox_reformatTelNr {
@@ -564,9 +567,13 @@ sub rcube_update_address_book {
 	###
 	# NOTE: Need to cut strings to place into name, email, firstname, surname
 	###
-	
+
 	# TODO - connect to the RCUBE database
-	
+
+	# TODO - wrap all into a DB transaction if the DB supports transactions to be able to rollback changes if any error occured
+	# Benefit: not deleting old data if there are any issues with inserting new data
+	# See example: http://search.cpan.org/~timb/DBI-1.616/DBI.pm#Transactions
+
 	# Delete old contacts for specified users
 	foreach my $userId ( split(',', $cfg->{RCUBE_ADDRBOOK_OWNERS} ) ) {
 		# TODO - SQL DELETE FROM `contacts` WHERE `user_id` = $userId
@@ -707,7 +714,7 @@ if($cfg->{MUTT_EXPORT_ENABLED}) {
 	mutt_update_address_book; 
 }
 
-# TODO - code reviewing 'rcube_update_address_book' and 'egw_read_db': what is the proper way via DBI to close a database handle, sql statement and result set at the time it is not needed any more?
+# TODO - code reviewing 'rcube_update_address_book' and 'egw_read_db': what is the proper way via DBI to close a database handle at the time it is not needed any more?
 # If there is a correct way to do it, we should do to free DB resources as soon as possible.
 
 
