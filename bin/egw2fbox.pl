@@ -27,9 +27,13 @@
 #
 ### CHANGELOG
 #
+# 0.5.3 2011-03-10 Kai Ellinger <coding@blicke.de>
+#                  - implemented SQL part of round cube address book sync but
+#                    still check field size before inserting into DB needs tbd
+#
 # 0.5.2 2011-03-08 Kai Ellinger <coding@blicke.de>
 #                  - started implementing round cube address book sync because I feel it is urgent ;-)
-#                    did not touch any SQL code, need to update all TODOs with inserting SQL code
+#                    did not touch any SQL code, need to update all TO DOs with inserting SQL code
 #                  - remove need for $FRITZXML being a global variable
 #
 # 0.5.1 2011-03-04 Christian Anton <mail@christiananton.de>
@@ -282,7 +286,7 @@ sub egw_read_db {
 
 	#print "Name for id 57 is $egw_address_data->{57}->{n_fn}\n";
 	my $amountData = keys(%{$egw_address_data});
-	verbose("found $amountData data rows in egw addr book");
+	verbose("egw_read_db() found $amountData data rows in egw addr book");
 
 	die "no data for owner(s) $cfg->{ADDRBOOK_OWNERS} found" if ( 0 == $amountData );
 
@@ -330,7 +334,6 @@ sub fbox_reformatTelNr {
 		# numbers of my country
 		$nr =~ s/^$cfg->{FBOX_INTERNATIONAL_ACCESS_CODE}$cfg->{FBOX_MY_COUNTRY_CODE}/$cfg->{FBOX_NATIONAL_ACCESS_CODE}/;
 	}
-	
 
 	return $nr;
 }
@@ -367,7 +370,7 @@ sub fbox_write_xml_contact {
 
 	foreach my $numbers_entry_ref (@$numbers_array_ref) {
 		# not defined values causing runtime errors
-		$o_verbose && verbose ("   type: ". ($numbers_entry_ref->{'type'} || "<undefined>") . " , number: ". ($numbers_entry_ref->{'nr'}|| "<undefined>")  );
+		$o_verbose && verbose ("fbox_write_xml_contact()   type: ". ($numbers_entry_ref->{'type'} || "<undefined>") . " , number: ". ($numbers_entry_ref->{'nr'}|| "<undefined>")  );
 		if ($$numbers_entry_ref{'nr'}) {
 			print $FRITZXML "<number type=\"$$numbers_entry_ref{'type'}\" vanity=\"\" prio=\"0\">" .
 				fbox_reformatTelNr($$numbers_entry_ref{'nr'}) .
@@ -427,7 +430,7 @@ EOF
 
 	foreach my $key ( keys(%{$egw_address_data}) ) {
 		my $contact_name = $egw_address_data->{$key}->{'n_fn'};
-		verbose ("generating XML snippet for contact $contact_name");
+		verbose ("fbox_gen_fritz_xml() generating XML snippet for contact $contact_name");
 		if ($egw_address_data->{$key}->{'n_prefix'}) {
 			$contact_name =~ s/^$egw_address_data->{$key}->{'n_prefix'}\s*//;
 		}
@@ -436,12 +439,12 @@ EOF
 		# counting phone numbers is only in compact mode needed
 		if($cfg->{FBOX_COMPACT_MODE}) {
 			$number_of_numbers = fbox_count_contacts_numbers($key);
-			verbose ("contact has $number_of_numbers phone numbers defined");
+			verbose ("fbox_gen_fritz_xml() contact has $number_of_numbers phone numbers defined");
 			}
 
 		if ( ($cfg->{FBOX_COMPACT_MODE}) && ($number_of_numbers <= 3) ){
 
-			verbose ("entering compact mode for this contact entry");
+			verbose ("fbox_gen_fritz_xml() entering compact mode for this contact entry");
 			my @numbers_array;
 
 
@@ -483,7 +486,7 @@ EOF
 
 		} else {
 
-			verbose ("entering non-compact mode for this contact entry");
+			verbose ("fbox_gen_fritz_xml() entering non-compact mode for this contact entry");
 
 			# start print the business contact entry
 			if (
@@ -492,7 +495,7 @@ EOF
 				($egw_address_data->{$key}->{'tel_assistent'})
 			 ) {
 
-				verbose ("  start writing the business contact entry");
+				verbose ("fbox_gen_fritz_xml()  start writing the business contact entry");
 				my @numbers_array;
 
 				push @numbers_array, { type=>'home',   nr=>$egw_address_data->{$key}->{'tel_work'} };
@@ -510,7 +513,7 @@ EOF
 				($egw_address_data->{$key}->{'tel_other'})
 			) {
 
-				verbose ("  start writing the private contact entry");
+				verbose ("fbox_gen_fritz_xml()  start writing the private contact entry");
 				my @numbers_array;
 
 				push @numbers_array, { type=>'home',   nr=>$egw_address_data->{$key}->{'tel_home'} };
@@ -534,110 +537,152 @@ EOF
 }
 
 sub rcube_update_address_book {
-	verbose ("updating round cube address book");
+	verbose ("rcube_update_address_book() updating round cube address book");
 	my $dbh;
-	my $sql; # the SQL statement should use bind variables for better performance
-	my $sth;
-	
-	## we don't need any more because we have EGW field contact_modified
-	#my $now_timestamp = time();
-	#  mysql> describe contacts;
-	#  +------------+------------------+------+-----+---------------------+----------------+
-	#  | Field      | Type             | Null | Key | Default             | Extra          |
-	#  +------------+------------------+------+-----+---------------------+----------------+
-	#  | contact_id | int(10) unsigned | NO   | PRI | NULL                | auto_increment | 
-	#  | changed    | datetime         | NO   |     | 1000-01-01 00:00:00 |                | 
-	#  | del        | tinyint(1)       | NO   |     | 0                   |                | 
-	#  | name       | varchar(128)     | NO   |     |                     |                | 
-	#  | email      | varchar(255)     | NO   |     | NULL                |                | 
-	#  | firstname  | varchar(128)     | NO   |     |                     |                | 
-	#  | surname    | varchar(128)     | NO   |     |                     |                | 
-	#  | vcard      | text             | YES  |     | NULL                |                | 
-	#  | user_id    | int(10) unsigned | NO   | MUL | 0                   |                | 
-	#  +------------+------------------+------+-----+---------------------+----------------+
-	### Round Cube table to EGW table field mapping:
-	# contact_id = auto
-	# changed = contact_modified
-	# name = n_fn - n_prefix + (RCUBE_BUSINESS_SUFFIX_STRING|RCUBE_PRIVATE_SUFFIX_STRING according to type of e-mail address)
-	# email = (contact_email|contact_email_home)
-	# firstname = n_given + n_middle
-	# surname = n_family
-	# vcard = null
-	# user_id = RCUBE_ADDRBOOK_OWNERS per each value (can be multiple)
-	###
-	# NOTE: Need to cut strings to place into name, email, firstname, surname
-	###
+	# perldoc of DBI recommends a new handle for each SQL statement
+	my $sql4insert; # the SQL statement should use bind variables
+	# INSERT INTO `contacts` (`email`, `name`, `firstname`, `surname`, `user_id`, `changed`)
+	# VALUES ($email, $name, $firstName, $familyName, $userId, $changed)
+	$sql4insert = "INSERT INTO `contacts` (`email`, `name`, `firstname`, `surname`, `user_id`, `changed`) VALUES (?, ?, ?, ?, ?, ?)";
+	my $sth4insert;
 
-	# TODO - connect to the RCUBE database
+	# default values for DB connect
+	if (!$cfg->{RCUBE_DBHOST}) { $cfg->{RCUBE_DBHOST} = 'localhost'; }
+	if (!$cfg->{RCUBE_DBPORT}) { $cfg->{RCUBE_DBPORT} = 3306; }
+	if (!$cfg->{RCUBE_DBNAME}) { $cfg->{RCUBE_DBNAME} = 'roundcubemail'; }
+	# don't set default values for DB user and password
+	die "ERROR: Round Cube database can't be accessed without DB user name or password set!"
+		if( !($cfg->{RCUBE_DBUSER}) || !($cfg->{RCUBE_DBPASS}) );
 
-	# TODO - wrap all into a DB transaction if the DB supports transactions to be able to rollback changes if any error occured
+	# SQL connect to the RCUBE database
+	my $dsn = "dbi:mysql:$cfg->{RCUBE_DBNAME}:$cfg->{RCUBE_DBHOST}:$cfg->{RCUBE_DBPORT}";
+	$dbh = DBI->connect($dsn, $cfg->{RCUBE_DBUSER}, $cfg->{RCUBE_DBPASS}) or die "could not connect db: $!";
+	# access database via UTF8; convert in print function if needed
+	$dbh->do("SET NAMES utf8");
+
+	# wrap all into a DB transaction if the DB supports transactions to be able to rollback changes if any error occurred
 	# Benefit: not deleting old data if there are any issues with inserting new data
 	# See example: http://search.cpan.org/~timb/DBI-1.616/DBI.pm#Transactions
 
-	# Delete old contacts for specified users
-	foreach my $userId ( split(',', $cfg->{RCUBE_ADDRBOOK_OWNERS} ) ) {
-		# TODO - SQL DELETE FROM `contacts` WHERE `user_id` = $userId
-	}
-	
-	# Insert contact details for contacts having mail addresses specified
-	foreach my $key ( keys(%{$egw_address_data}) ) {
-		my $contact_name = $egw_address_data->{$key}->{'n_fn'};
-		verbose ("generating rcube address book for contact $contact_name");
-		
-		# if there is a prefix such as Mr, Mrs, Herr Frau, remove it
-		if ($egw_address_data->{$key}->{'n_prefix'}) {
-			$contact_name =~ s/^$egw_address_data->{$key}->{'n_prefix'}\s*//;
+	# SQL START TRANSACTION
+	$dbh->{AutoCommit} = 0;  # enable transactions, if possible
+	$dbh->{RaiseError} = 1;
+	eval {
+
+		## we don't need any more because we have EGW field contact_modified
+		#my $now_timestamp = time();
+		#  mysql> describe contacts;
+		#  +------------+------------------+------+-----+---------------------+----------------+
+		#  | Field      | Type             | Null | Key | Default             | Extra          |
+		#  +------------+------------------+------+-----+---------------------+----------------+
+		#  | contact_id | int(10) unsigned | NO   | PRI | NULL                | auto_increment | 
+		#  | changed    | datetime         | NO   |     | 1000-01-01 00:00:00 |                | 
+		#  | del        | tinyint(1)       | NO   |     | 0                   |                | 
+		#  | name       | varchar(128)     | NO   |     |                     |                | 
+		#  | email      | varchar(255)     | NO   |     | NULL                |                | 
+		#  | firstname  | varchar(128)     | NO   |     |                     |                | 
+		#  | surname    | varchar(128)     | NO   |     |                     |                | 
+		#  | vcard      | text             | YES  |     | NULL                |                | 
+		#  | user_id    | int(10) unsigned | NO   | MUL | 0                   |                | 
+		#  +------------+------------------+------+-----+---------------------+----------------+
+		### Round Cube table to EGW table field mapping:
+		# contact_id = auto
+		# changed = contact_modified
+		# name = n_fn - n_prefix + (RCUBE_BUSINESS_SUFFIX_STRING|RCUBE_PRIVATE_SUFFIX_STRING according to type of e-mail address)
+		# email = (contact_email|contact_email_home)
+		# firstname = n_given + n_middle
+		# surname = n_family
+		# vcard = null
+		# user_id = RCUBE_ADDRBOOK_OWNERS per each value (can be multiple)
+		###
+		# NOTE: Need to cut strings to place into name, email, firstname, surname
+		###
+
+		# SQL DELETE old contacts for specified users
+		# perldoc of DBI recommends a new handle for each SQL statement
+		my $sth4delete = $dbh->prepare("DELETE FROM `contacts` WHERE `user_id` IN (?)");
+		foreach my $userId ( split(',', $cfg->{RCUBE_ADDRBOOK_OWNERS} ) ) {
+			verbose "rcube_update_address_book() Deleting RCUBE addresses for user id: -$userId-";
+			verbose "rcube_update_address_book() Returning: " . $sth4delete->execute( $userId );
 		}
-		
-		# if first name exists
-		my $first_name = "";
-		if($egw_address_data->{$key}->{'n_given'}) { $first_name = $egw_address_data->{$key}->{'n_given'}; }
-		if($egw_address_data->{$key}->{'n_middle'}) { $first_name = " " . $egw_address_data->{$key}->{'n_middle'}; }
-			
-		# each round cube user has his own address book
-		foreach my $userId ( split(',', $cfg->{RCUBE_ADDRBOOK_OWNERS}) ) {
-		
-			# the business e-mail address
-			if($egw_address_data->{$key}->{'contact_email'}) {
-				my $full_name = $contact_name;
-				# if suffix exists
-				if($cfg->{RCUBE_BUSINESS_SUFFIX_STRING}) { $full_name .= " " . $cfg->{RCUBE_BUSINESS_SUFFIX_STRING}; }
-				rcube_insert_address(
-					$sth,
-					$egw_address_data->{$key}->{'contact_email'},
-					$full_name,
-					$first_name,
-					$egw_address_data->{$key}->{'n_family'},
-					$userId,
-					$egw_address_data->{$key}->{'contact_modified'}
-				);
+
+		# SQL prepare INSERT statement to be re-used for better performance inside script
+		$sth4insert = $dbh->prepare($sql4insert);
+
+		# Insert contact details for contacts having mail addresses specified
+		foreach my $key ( keys(%{$egw_address_data}) ) {
+			my $contact_name = $egw_address_data->{$key}->{'n_fn'};
+			verbose ("rcube_update_address_book() generating rcube address book for contact $contact_name");
+
+			# if there is a prefix such as Mr, Mrs, Herr Frau, remove it
+			if ($egw_address_data->{$key}->{'n_prefix'}) {
+				$contact_name =~ s/^$egw_address_data->{$key}->{'n_prefix'}\s*//;
 			}
-			
-			# the private e-mail address
-			if($egw_address_data->{$key}->{'contact_email_home'}) {
-				my $full_name = $contact_name;
-				# if suffix exists
-				if($cfg->{RCUBE_PRIVATE_SUFFIX_STRING}) { $full_name .= " " . $cfg->{RCUBE_PRIVATE_SUFFIX_STRING}; }
-				rcube_insert_address(
-					$sth,
-					$egw_address_data->{$key}->{'contact_email_home'},
-					$full_name,
-					$first_name,
-					$egw_address_data->{$key}->{'n_family'},
-					$userId,
-					$egw_address_data->{$key}->{'contact_modified'}
-				);
-			}
-		} #END: foreach my $userId ( split(',',) $cfg->{RCUBE_ADDRBOOK_OWNERS} )
+
+			# if first name exists
+			my $first_name = "";
+			if($egw_address_data->{$key}->{'n_given'}) { $first_name = $egw_address_data->{$key}->{'n_given'}; }
+			if($egw_address_data->{$key}->{'n_middle'}) { $first_name = " " . $egw_address_data->{$key}->{'n_middle'}; }
+
+			# each round cube user has his own address book
+			foreach my $userId ( split(',', $cfg->{RCUBE_ADDRBOOK_OWNERS}) ) {
+
+				# the business e-mail address
+				if($egw_address_data->{$key}->{'contact_email'}) {
+					my $full_name = $contact_name;
+					# if suffix exists
+					if($cfg->{RCUBE_BUSINESS_SUFFIX_STRING}) { $full_name .= " " . $cfg->{RCUBE_BUSINESS_SUFFIX_STRING}; }
+					rcube_insert_mail_address(
+						$sth4insert,
+						$egw_address_data->{$key}->{'contact_email'},
+						$full_name,
+						$first_name,
+						$egw_address_data->{$key}->{'n_family'},
+						$userId,
+						$egw_address_data->{$key}->{'contact_modified'}
+					);
+				}
+
+				# the private e-mail address
+				if($egw_address_data->{$key}->{'contact_email_home'}) {
+					my $full_name = $contact_name;
+					# if suffix exists
+					if($cfg->{RCUBE_PRIVATE_SUFFIX_STRING}) { $full_name .= " " . $cfg->{RCUBE_PRIVATE_SUFFIX_STRING}; }
+					rcube_insert_mail_address(
+						$sth4insert,
+						$egw_address_data->{$key}->{'contact_email_home'},
+						$full_name,
+						$first_name,
+						$egw_address_data->{$key}->{'n_family'},
+						$userId,
+						$egw_address_data->{$key}->{'contact_modified'}
+					);
+				}
+			} #END: foreach my $userId ( split(',',) $cfg->{RCUBE_ADDRBOOK_OWNERS} )
+
+		} # END: foreach my $key ( keys(%{$egw_address_data}) )
+
+		# SQL COMMIT
+		#2 test transactions only: $dbh->rollback;
+		$dbh->commit; # commit the changes if we get this far
 		
-		
-	} # END: foreach my $key ( keys(%{$egw_address_data}) )
-	
-	# TODO - close RCUBE database
+	};
+
+	# SQL ROLLBACK if there was any error
+	if ($@) {
+		warn "Transaction aborted because $@";
+		# now rollback to undo the incomplete changes
+		# but do it in an eval{} as it may also fail
+		eval { $dbh->rollback };
+		# add other application on-error-clean-up code here
+	}
+
+	# SQL Disconnect from DB
+	$dbh->disconnect or warn "error diconnecting from Round Cube database: " . $dbh->errstr;
 }
 
 
-sub rcube_insert_address() {
+sub rcube_insert_mail_address() {
 		my $sth       = shift;
 		my $email     = shift;
 		my $name      = shift;
@@ -646,24 +691,24 @@ sub rcube_insert_address() {
 		my $userId    = shift;
 		my $changed   = shift;
 
-		verbose ("INSERT data for: rcube RQ user id '$userId' contact '$name' mail '$email'");
+		verbose ("rcube_insert_mail_address() RQ user id '$userId' contact '$name' mail '$email'");
 		
-		# TODO - check field size before inserting anyhing into table
+		# TODO - check field size before inserting anything into table
 		
-		# TODO insert into table; use the already prepared statement $sth and insert the values via bind variables
+		# insert into table; use the already prepared statement $sth and insert the values via bind variables
 		# See DBI - http://search.cpan.org/~timb/DBI-1.616/DBI.pm
-		# Example: 
-		# $sth = $dbh->prepare("SELECT foo, bar FROM table WHERE baz=?"); # in rcube_update_address_book
-		# $sth->execute( $baz ); # in rcube_insert_address
-		
+
+		# SQL INSERT statement execution
 		# INSERT INTO `contacts` (`email`, `name`, `firstname`, `surname`, `user_id`, `changed`)
 		# VALUES ($email, $name, $firstName, $familyName, $userId, $changed)
+		verbose "rcube_insert_mail_address() SQL INSERT INTO `contacts` (`email`, `name`, `firstname`, `surname`, `user_id`, `changed`) VALUES ($email, $name, $firstName, $familyName, $userId, $changed)";
+		verbose "rcube_insert_mail_address() Returning: " . $sth->execute($email, $name, $firstName, $familyName, $userId, $changed);
 		
 }
 
 
 sub mutt_update_address_book {
-	verbose ("updating mutt address book");
+	verbose ("mutt_update_address_book() updating mutt address book");
 	my $index = 0;
 
 	open (my $MUTT, ">", $cfg->{MUTT_EXPORT_FILE}) or die "could not open file! $!";
@@ -713,8 +758,3 @@ if($cfg->{RCUBE_EXPORT_ENABLED}) {
 if($cfg->{MUTT_EXPORT_ENABLED}) { 
 	mutt_update_address_book; 
 }
-
-# TODO - code reviewing 'rcube_update_address_book' and 'egw_read_db': what is the proper way via DBI to close a database handle at the time it is not needed any more?
-# If there is a correct way to do it, we should do to free DB resources as soon as possible.
-
-
