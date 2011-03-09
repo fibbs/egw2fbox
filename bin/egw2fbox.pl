@@ -518,7 +518,7 @@ EOF
 
 				fbox_write_xml_contact($FRITZXML, $contact_name, $cfg->{FBOX_PRIVATE_SUFFIX_STRING}, \@numbers_array, $egw_address_data->{$key}->{'contact_modified'});
 			}
-			# end print the business contact entry
+			# end print the private contact entry
 		}
 		# end non-compact mode
 	}
