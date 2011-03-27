@@ -26,6 +26,13 @@
 #       MA 02110-1301, USA.
 #
 ### CHANGELOG
+# 0.5.4 2011-03-28 Kai Ellinger <coding@blicke.de>
+#                  - Removing need for $egw_address_data being an global variable to be able to 
+#                    sync different user / group address books for different clients
+#                  - Making egw_read_db() flexible to return addresses for different address book owners
+#                  - Caching EGW addresses to avoid DB access
+#                  - egw_read_db() now retuning last modified time stamp to stop writing data to external
+#                    client if not modified since last run, if MAIN calling export routine supports this
 #
 # 0.5.3 2011-03-10 Kai Ellinger <coding@blicke.de>
 #                  - implemented SQL part of round cube address book sync but
@@ -117,9 +124,6 @@ my $o_verbose;
 my $o_configfile = "egw2fbox.conf";
 my $cfg;
 
-## eGroupware
-my $egw_address_data;
-
 ## fritz box config parameters we don't like to be modified without thinking
 # the maximum number of characters that a Fritz box phone book name can have
 my $FboxMaxLenghtForName = 32;
@@ -170,9 +174,23 @@ sub verbose{
 }
 
 sub egw_read_db {
+	# List of owners to return address book entries for
+	my $egw_user_name_list = shift;
+	
+	# eGroupware info to return
+	my $egw_address_data;
+	my $egw_address_modified;
+	
+	
+	# DB related handles
 	my $dbh;
-	my $sth;
-	my $sql;
+	# data
+	my $sth_data;
+	my $sql_data;
+	# last modified
+	my $sth_mod;
+	my $sql_mod;
+	
 
 	# default values for DB connect
 	if (!$cfg->{EGW_DBHOST}) { $cfg->{EGW_DBHOST} = 'localhost'; }
@@ -256,7 +274,26 @@ sub egw_read_db {
 	#  | contact_uid          | varchar(255) | YES  | MUL | NULL    |                | 
 	#  +----------------------+--------------+------+-----+---------+----------------+
 
-	$sql = "
+	# read last modified time stamp
+	$sql_mod = "
+		SELECT
+			MAX(`contact_modified`)
+		FROM
+			`egw_addressbook`
+		WHERE
+			`contact_owner` IN ( $egw_user_name_list )
+	";
+	
+	$sth_mod = $dbh->prepare($sql_mod);
+	$sth_mod->execute;
+	my @egw_address_modified_array = $sth_mod->fetchrow_array;
+	$egw_address_modified = $egw_address_modified_array[0];
+	verbose("egw_read_db() last addess modify time stamp for user(s) '$egw_user_name_list' is '$egw_address_modified'!");
+	# SQL close statement handle after use
+	$sth_mod->finish;
+
+	# read address book data
+	$sql_data = "
 		SELECT
 			`contact_id`,
 			`n_prefix`,
@@ -276,13 +313,17 @@ sub egw_read_db {
 		FROM
 			`egw_addressbook`
 		WHERE
-			`contact_owner` IN ( $cfg->{EGW_ADDRBOOK_OWNERS} )
+			`contact_owner` IN ( $egw_user_name_list )
 	";
+#			`contact_owner` IN ( $cfg->{EGW_ADDRBOOK_OWNERS} )
 
-	$sth = $dbh->prepare($sql);
-	$sth->execute;
 
-	$egw_address_data = $sth->fetchall_hashref('contact_id');
+	$sth_data = $dbh->prepare($sql_data);
+	$sth_data->execute;
+
+	$egw_address_data = $sth_data->fetchall_hashref('contact_id');
+	# SQL close statement handle after use
+	$sth_data->finish;
 
 	#print "Name for id 57 is $egw_address_data->{57}->{n_fn}\n";
 	my $amountData = keys(%{$egw_address_data});
@@ -292,6 +333,9 @@ sub egw_read_db {
 
 	# Disconnect from DB
 	$dbh->disconnect or warn "error diconnecting from EGW database: " . $dbh->errstr;
+	
+	# Return found addresses
+	return $egw_address_data, $egw_address_modified;
 }
 
 sub fbox_reformatTelNr {
@@ -384,6 +428,7 @@ sub fbox_write_xml_contact {
 }
 
 sub fbox_count_contacts_numbers {
+	my $egw_address_data = shift;
 	my $key = shift;
 	my $count = 0;
 
@@ -398,7 +443,11 @@ sub fbox_count_contacts_numbers {
 }
 
 sub fbox_gen_fritz_xml {
-	my $now_timestamp = time();
+	## eGroupware
+	my $egw_address_data = shift;
+	
+	## taking modification time stamp from EGW DB instead
+	# my $now_timestamp = time();
 
 	# make file descriptor for XML output file global
 	my $FRITZXML;
@@ -438,7 +487,7 @@ EOF
 		my $number_of_numbers = 0;
 		# counting phone numbers is only in compact mode needed
 		if($cfg->{FBOX_COMPACT_MODE}) {
-			$number_of_numbers = fbox_count_contacts_numbers($key);
+			$number_of_numbers = fbox_count_contacts_numbers($egw_address_data, $key);
 			verbose ("fbox_gen_fritz_xml() contact has $number_of_numbers phone numbers defined");
 			}
 
@@ -538,6 +587,11 @@ EOF
 
 sub rcube_update_address_book {
 	verbose ("rcube_update_address_book() updating round cube address book");
+	
+	## eGroupware data
+	my $egw_address_data = shift;
+	
+	## DB related handles
 	my $dbh;
 	# perldoc of DBI recommends a new handle for each SQL statement
 	my $sql4insert; # the SQL statement should use bind variables
@@ -605,6 +659,8 @@ sub rcube_update_address_book {
 			$o_verbose && verbose "rcube_update_address_book() Deleting RCUBE addresses for user id: -$userId-";
 			verbose "rcube_update_address_book() Returning: " . $sth4delete->execute( $userId );
 		}
+		# SQL close statement handle after use
+		$sth4delete->finish;
 
 		# SQL prepare INSERT statement to be re-used for better performance inside script
 		$sth4insert = $dbh->prepare($sql4insert);
@@ -662,6 +718,9 @@ sub rcube_update_address_book {
 
 		} # END: foreach my $key ( keys(%{$egw_address_data}) )
 
+		# SQL close statement handle after use
+		$sth4insert->finish;
+
 		# SQL COMMIT
 		#2 test transactions only: $dbh->rollback;
 		$dbh->commit; # commit the changes if we get this far
@@ -709,8 +768,12 @@ sub rcube_insert_mail_address() {
 
 sub mutt_update_address_book {
 	verbose ("mutt_update_address_book() updating mutt address book");
+	
+	## eGroupware
+	my $egw_address_data = shift;
+	
+	## start writing address file
 	my $index = 0;
-
 	open (my $MUTT, ">", $cfg->{MUTT_EXPORT_FILE}) or die "could not open file! $!";
 
 	foreach my $key ( keys(%{$egw_address_data}) ) {
@@ -748,13 +811,47 @@ sub mutt_update_address_book {
 #### MAIN
 check_args;
 parse_config;
-egw_read_db();
-if($cfg->{FBOX_EXPORT_ENABLED}) { 
-	fbox_gen_fritz_xml; 
+# buffer EGW database querry results
+my $cachedEgwAddressBookData;
+
+### update FritzBox address book
+if($cfg->{FBOX_EXPORT_ENABLED} && $cfg->{EGW_ADDRBOOK_OWNERS}) { 
+	verbose("main() FBOX -  START");
+	# if we did not read EGW DB already 
+	if(! exists $cachedEgwAddressBookData->{'TIME'}->{ $cfg->{EGW_ADDRBOOK_OWNERS} } ) {
+		verbose("main() FBOX - Seems we did not already read the EGW DB for this user combination!");
+		( $cachedEgwAddressBookData->{'DATA'}->{ $cfg->{EGW_ADDRBOOK_OWNERS} }, 
+		  $cachedEgwAddressBookData->{'TIME'}->{ $cfg->{EGW_ADDRBOOK_OWNERS} } ) = egw_read_db($cfg->{EGW_ADDRBOOK_OWNERS});
+	}
+	# TODO need check for "if $cachedEgwAddressBookData->{'TIME'}->{ 'user_list' } time stamp is same as at last run, do nothing"
+	# or when forced = only write if needed
+	fbox_gen_fritz_xml( $cachedEgwAddressBookData->{'DATA'}->{ $cfg->{EGW_ADDRBOOK_OWNERS} } ); 
 }
-if($cfg->{RCUBE_EXPORT_ENABLED}) { 
-	rcube_update_address_book; 
+
+### update RoundCube address book
+if($cfg->{RCUBE_EXPORT_ENABLED} && $cfg->{EGW_ADDRBOOK_OWNERS}) {
+	verbose("main() RCUBE -  START");
+	# if we did not read EGW DB already 
+	if(! exists $cachedEgwAddressBookData->{'TIME'}->{ $cfg->{EGW_ADDRBOOK_OWNERS} } ) {
+		verbose("main() RCUBE - Seems we did not already read the EGW DB for this user combination!");
+		( $cachedEgwAddressBookData->{'DATA'}->{ $cfg->{EGW_ADDRBOOK_OWNERS} }, 
+		  $cachedEgwAddressBookData->{'TIME'}->{ $cfg->{EGW_ADDRBOOK_OWNERS} } ) = egw_read_db($cfg->{EGW_ADDRBOOK_OWNERS});
+	}
+	# TODO need check for "if $cachedEgwAddressBookData->{'TIME'}->{ 'user_list' } time stamp is same as at last run, do nothing"
+	# or when forced = only write if needed
+	rcube_update_address_book( $cachedEgwAddressBookData->{'DATA'}->{ $cfg->{EGW_ADDRBOOK_OWNERS} } ); 
 }
-if($cfg->{MUTT_EXPORT_ENABLED}) { 
-	mutt_update_address_book; 
+
+### update MUTT address book
+if($cfg->{MUTT_EXPORT_ENABLED} && $cfg->{EGW_ADDRBOOK_OWNERS}) {
+	verbose("main() MUTT -  START");
+	# if we did not read EGW DB already 
+	if(! exists $cachedEgwAddressBookData->{'TIME'}->{ $cfg->{EGW_ADDRBOOK_OWNERS} } ) {
+		verbose("main() MUTT - Seems we did not already read the EGW DB for this user combination!");
+		( $cachedEgwAddressBookData->{'DATA'}->{ $cfg->{EGW_ADDRBOOK_OWNERS} }, 
+		  $cachedEgwAddressBookData->{'TIME'}->{ $cfg->{EGW_ADDRBOOK_OWNERS} } ) = egw_read_db($cfg->{EGW_ADDRBOOK_OWNERS});
+	}
+	# TODO need check for "if $cachedEgwAddressBookData->{'TIME'}->{ 'user_list' } time stamp is same as at last run, do nothing"
+	# or when forced = only write if needed
+	mutt_update_address_book( $cachedEgwAddressBookData->{'DATA'}->{ $cfg->{EGW_ADDRBOOK_OWNERS} } ); 
 }
