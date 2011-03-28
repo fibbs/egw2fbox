@@ -57,15 +57,16 @@ then
 	exit 254
 fi
 
-BASEDIR=$(grep "CRON_BASEDIR" $CONFIGFILE | cut -d"=" -f2|sed "s/ //g"|sed "s/\/\+$//")
+BASEDIR=$(grep "CRON_BASEDIR" $CONFIGFILE | sed "s/\#.*//g" | cut -d"=" -f2|sed "s/ //g"|sed "s/\/\+$//")
 
 if [ ! -d "$BASEDIR" ]; then
 	echo "basedir $BASEDIR not found or is not a directory"
 	exit 252
 fi
 
-BINDIR=$BASEDIR/bin
-DATADIR=$BASEDIR/data
+BINDIR=$(grep "CRON_BINDIR" $CONFIGFILE | sed "s/\#.*//g" | cut -d"=" -f2 |sed "s/ //g"|sed "s/\/\+$//")
+XMLFILE=$(grep "FBOX_OUTPUT_XML_FILE" $CONFIGFILE | sed "s/\#.*//g" | cut -d"=" -f2|sed "s/ //g"|sed "s/\/\+$//")
+HASHFILE=$(grep "CRON_FBOX_XML_HASH" $CONFIGFILE | sed "s/\#.*//g" | cut -d"=" -f2 |sed "s/ //g"|sed "s/\/\+$//")
 
 
 ### DO WORK
@@ -93,8 +94,8 @@ else
 fi
 
 # hash
-NEWHASH=$(cat $DATADIR/phonebook.xml | grep -v mod_time | md5sum | cut -d" " -f1)
-OLDHASH=$(cat $DATADIR/phonebook.hash 2>/dev/null)
+NEWHASH=$(cat $XMLFILE | grep -v mod_time | md5sum | cut -d" " -f1)
+OLDHASH=$(cat $HASHFILE 2>/dev/null)
 
 if [ "_$OLDHASH" = "_$NEWHASH" ]
 then
@@ -109,7 +110,7 @@ else
 		# in case of i. e. network problems that one should fail and
 		# make this wrapper script recognize that another upload is
 		# needed
-		echo $NEWHASH >$DATADIR/phonebook.hash
+		echo $NEWHASH >$HASHFILE
 		verbose "upload succeeded"
 	else
 		verbose "upload could not be finished correctly"

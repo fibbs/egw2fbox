@@ -26,6 +26,26 @@
 #       MA 02110-1301, USA.
 #
 ### CHANGELOG
+# 0.6.0 2011-03-28 Kai Ellinger <coding@blicke.de>
+#                  RoundCube:
+#                  - It turned out that the current state of the implementation already 
+#                    supports global address books in Round Cube. Successfully tested!
+#                  - You need to install the Round Cube plug in 'globaladdressbook' first.
+#                    Download: http://trac.roundcube.net/wiki/Plugin_Repository
+#
+#                  Cronjob.sh:
+#                  - Moving hard coded variables from cronjob.sh to egw2fbox.conf:
+#                    * CRON_FBOX_XML_HASH, CRON_FBOX_UPLOAD_SCRIPT
+#                  - Added comment awareness of config file parser in cronjob.sh
+#
+#                  Update clients only if EGW contacts changed for defined EGW user:
+#                  - Preparation of egw2fbox.conf for lazy update feature:
+#                    * EGW_LAZY_UPDATE_TIME_STAMP_FILE, FBOX_LAZY_UPDATE, RCUBE_LAZY_UPDATE, MUTT_LAZY_UPDATE
+#
+#                  Allow defining a different EGW user list for each client:
+#                  - Preparation of egw2fbox.conf for defining different EGW address book owners per each client
+#                    * FBOX_EGW_ADDRBOOK_OWNERS, RCUBE_EGW_ADDRBOOK_OWNERS, MUTT_EGW_ADDRBOOK_OWNERS
+#
 # 0.5.4 2011-03-28 Kai Ellinger <coding@blicke.de>
 #                  - Removing need for $egw_address_data being an global variable to be able to 
 #                    sync different user / group address books for different clients

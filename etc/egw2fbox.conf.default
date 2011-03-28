@@ -3,13 +3,18 @@
 ############################################
 ### config parameters for egw2fbox.pl
 ############################################
-### stuff for mysql EGROUPWARE
+### time stamps for last EGW contact updates
+EGW_LAZY_UPDATE_TIME_STAMP_FILE = /path/to/egw2fbox_basedir/data/egw_timestamps.data
+### db connect values to EGROUPWARE
 EGW_DBHOST = 127.0.0.1
 EGW_DBPORT = 3306
 EGW_DBNAME = egroupware
 EGW_DBUSER = <db_username>
 EGW_DBPASS = <db_password>
-# list of IDs that needs to be imported to the Fritz Box
+# GLOBAL list of IDs that needs to be imported to the Fritz Box, Round Cube or MUTT
+# This is taken as default value for Fritz Box, Round Cube and MUTT if not overwritten
+# in the configuration section of each client.
+#
 # See EGW table egw_addressbook; group ids are negative; user ids are positive
 EGW_ADDRBOOK_OWNERS = <id1>,<id2>
 
@@ -17,11 +22,16 @@ EGW_ADDRBOOK_OWNERS = <id1>,<id2>
 # Enabling Fritz Box export create a XML file the cronjob can upload to the fritz box
 # FBOX_EXPORT_ENABLED = 0|1 # 0 = off ; 1 = on
 FBOX_EXPORT_ENABLED = 1
+# only update Fritz Box XML file if values in EGW database changed
+FBOX_LAZY_UPDATE = 1
+# Overwrite EGW_ADDRBOOK_OWNERS for Fritz Box export
+# See EGW table egw_addressbook; group ids are negative; user ids are positive
+#FBOX_EGW_ADDRBOOK_OWNERS = <id1>,<id2>
 # compact_mode creates only one phone book entry if less than 3 phone numbers exist:
 # FBOX_COMPACT_MODE = 0|1 # 0 = off ; 1 = on
 FBOX_COMPACT_MODE = 1
-# for XML generation (Fritzbox)
-FBOX_OUTPUT_XML_FILE = /path/to/phonebook.xml
+# for XML generation (Fritz Box)
+FBOX_OUTPUT_XML_FILE = /path/to/egw2fbox_basedir/data/phonebook.xml
 # try 16 characters for Siemens Gigaset DECT phones and 18 characters for FritzPhone
 FBOX_TOTAL_NAME_LENGTH = 16
 FBOX_BUSINESS_SUFFIX_STRING = W
@@ -38,22 +48,47 @@ FBOX_MY_AREA_CODE=89
 # Enabling Round Cube export updates private and business mail addresses to round cube address book
 # RCUBE_EXPORT_ENABLED = 0|1 # 0 = off ; 1 = on
 RCUBE_EXPORT_ENABLED = 1
+# only update Round Cube database if values in EGW database changed
+RCUBE_LAZY_UPDATE = 1
+# Overwrite EGW_ADDRBOOK_OWNERS for Round Cube export
+# See EGW table egw_addressbook; group ids are negative; user ids are positive
+#RCUBE_EGW_ADDRBOOK_OWNERS = <id1>,<id2>
+# db connect values to Round Cube
 RCUBE_DBHOST = 127.0.0.1
 RCUBE_DBPORT = 3306
 RCUBE_DBNAME = roundcubemail
 RCUBE_DBUSER = <db_username>
 RCUBE_DBPASS = <db_password>
-# list of Round Cube users that like to import the e-mail addresses
+
+# list of Round Cube users that need to import the e-mail addresses from EGW
 # See RoundCube table users field user_id for the right numbers
+# - enter the global address book owner's user_id when using a global address book provided by RoundCube plug in 'globaladdressbook'
+#   see file roundcubemail/plugins/globaladdressbook/config.inc.php variable $rcmail_config['globaladdressbook_user'] for user name
+#   and table 'users' for 'user_id' related to the name
+#   benefits:
+#    * global address books can be shared across a single domain or all users, a bit like the group address book in EGW
+#    * global address books can be read only to avoid editing then because EGW is the master anyway
+#    * no need to sync the same data for each and every user
+# - enter user_id or a list of user_id when using personal address books
+#   benefits:
+#    * no need to install RoundCube plug in 'globaladdressbook'
 RCUBE_ADDRBOOK_OWNERS = <id1>,<id2>
 RCUBE_BUSINESS_SUFFIX_STRING = (work)
 RCUBE_PRIVATE_SUFFIX_STRING = (home)
 
+
 #### stuff for Mutt
 MUTT_EXPORT_ENABLED = 1
+# only update MUTT address book if values in EGW database changed
+MUTT_LAZY_UPDATE = 1
+# Overwrite EGW_ADDRBOOK_OWNERS for MUTT export
+# See EGW table egw_addressbook; group ids are negative; user ids are positive
+#MUTT_EGW_ADDRBOOK_OWNERS = <id1>,<id2>
+# How to identify a business mail address and a private mail address?
 MUTT_BUSINESS_SUFFIX_STRING = WORK
 MUTT_PRIVATE_SUFFIX_STRING = HOME
-MUTT_EXPORT_FILE = /path/to/mutt_egw_addresses
+# Where to create the MUTT address book?
+MUTT_EXPORT_FILE = /path/to/egw2fbox_basedir/data/mutt_egw_addresses
 
 
 ############################################
@@ -61,10 +96,16 @@ MUTT_EXPORT_FILE = /path/to/mutt_egw_addresses
 ############################################
 FRITZUPLOADER_FRITZBOX_IP = fritz.box
 FRITZUPLOADER_FRITZBOX_PW = <fb_admin_password>
-FRITZUPLOADER_XML_FILE = /path/to/phonebook.xml
+FRITZUPLOADER_XML_FILE = /path/to/egw2fbox_basedir/data/phonebook.xml
 
 
 ############################################
 ### config parameters for cronjob.sh
 ############################################
 CRON_BASEDIR = /path/to/egw2fbox_basedir
+# directory to find 'egw2fbox.pl' and 'fritzuploader.pl'
+CRON_BINDIR = /Users/kellinge/egw2fbox/bin
+# to avoid to many write cycles to the flash PROM
+# only upload XML file to Fritz Box if any value inside FBOX_OUTPUT_XML_FILE changed
+CRON_FBOX_XML_HASH = /path/to/egw2fbox_basedir/data/phonebook.hash
+
