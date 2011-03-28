@@ -834,6 +834,9 @@ parse_config;
 # buffer EGW database querry results
 my $cachedEgwAddressBookData;
 
+# TODO implement lazy update
+# TODO implement different address books for each client
+
 ### update FritzBox address book
 if($cfg->{FBOX_EXPORT_ENABLED} && $cfg->{EGW_ADDRBOOK_OWNERS}) { 
 	verbose("main() FBOX -  START");
