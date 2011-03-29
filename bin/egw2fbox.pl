@@ -28,7 +28,7 @@
 ### CHANGELOG
 # 0.7.0 2011-03-29 Kai Ellinger <coding@blicke.de>
 #                  - Lazy Update implemented
-#                  - Implemented dedicated user list EGW user lists FBOX_EGW_ADDRBOOK_OWNERS, RCUBE_EGW_ADDRBOOK_OWNERS, MUTT_EGW_ADDRBOOK_OWNERS
+#                  - Implemented dedicated EGW user lists FBOX_EGW_ADDRBOOK_OWNERS, RCUBE_EGW_ADDRBOOK_OWNERS, MUTT_EGW_ADDRBOOK_OWNERS
 #                    in addition to already existing global EGW user list EGW_ADDRBOOK_OWNERS
 #
 # 0.6.0 2011-03-28 Kai Ellinger <coding@blicke.de>
