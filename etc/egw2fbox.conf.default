@@ -23,7 +23,7 @@ EGW_ADDRBOOK_OWNERS = <id1>,<id2>
 # FBOX_EXPORT_ENABLED = 0|1 # 0 = off ; 1 = on
 FBOX_EXPORT_ENABLED = 1
 # only update Fritz Box XML file if values in EGW database changed
-FBOX_LAZY_UPDATE = 1
+FBOX_LAZY_UPDATE = 0
 # Overwrite EGW_ADDRBOOK_OWNERS for Fritz Box export
 # See EGW table egw_addressbook; group ids are negative; user ids are positive
 #FBOX_EGW_ADDRBOOK_OWNERS = <id1>,<id2>
@@ -49,7 +49,7 @@ FBOX_MY_AREA_CODE=89
 # RCUBE_EXPORT_ENABLED = 0|1 # 0 = off ; 1 = on
 RCUBE_EXPORT_ENABLED = 1
 # only update Round Cube database if values in EGW database changed
-RCUBE_LAZY_UPDATE = 1
+RCUBE_LAZY_UPDATE = 0
 # Overwrite EGW_ADDRBOOK_OWNERS for Round Cube export
 # See EGW table egw_addressbook; group ids are negative; user ids are positive
 #RCUBE_EGW_ADDRBOOK_OWNERS = <id1>,<id2>
@@ -80,7 +80,7 @@ RCUBE_PRIVATE_SUFFIX_STRING = (home)
 #### stuff for Mutt
 MUTT_EXPORT_ENABLED = 1
 # only update MUTT address book if values in EGW database changed
-MUTT_LAZY_UPDATE = 1
+MUTT_LAZY_UPDATE = 0
 # Overwrite EGW_ADDRBOOK_OWNERS for MUTT export
 # See EGW table egw_addressbook; group ids are negative; user ids are positive
 #MUTT_EGW_ADDRBOOK_OWNERS = <id1>,<id2>

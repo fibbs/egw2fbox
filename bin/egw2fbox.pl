@@ -26,6 +26,11 @@
 #       MA 02110-1301, USA.
 #
 ### CHANGELOG
+# 0.7.0 2011-03-29 Kai Ellinger <coding@blicke.de>
+#                  - Lazy Update implemented
+#                  - Implemented dedicated user list EGW user lists FBOX_EGW_ADDRBOOK_OWNERS, RCUBE_EGW_ADDRBOOK_OWNERS, MUTT_EGW_ADDRBOOK_OWNERS
+#                    in addition to already existing global EGW user list EGW_ADDRBOOK_OWNERS
+#
 # 0.6.0 2011-03-28 Kai Ellinger <coding@blicke.de>
 #                  RoundCube:
 #                  - It turned out that the current state of the implementation already 
@@ -130,6 +135,7 @@
 #                  Initial version of this script, ready for world domination ;-)
 
 #### modules
+# see http://perldoc.perl.org/perlmodlib.html for what is provided via perlmodlib
 use warnings;     # installed by default via perlmodlib
 use strict;       # installed by default via perlmodlib
 use Getopt::Long; # installed by default via perlmodlib
@@ -137,12 +143,19 @@ use DBI;          # not included in perlmodlib: DBI and DBI::Mysql needs to be i
 use Data::Dumper;            # installed by default via perlmodlib
 use List::Util qw [min max]; # installed by default via perlmodlib
 use Encode;       # installed by default via perlmodlib
+use Storable;     # installed by default via perlmodlib
+
 
 #### global variables
 ## config
 my $o_verbose;
 my $o_configfile = "egw2fbox.conf";
 my $cfg;
+
+# buffer EGW database querry results for further use and avoid updates if nothing changed
+my $cachedEgwAddressBookData;
+my $oldEgwTimeStamps;
+my $lazyUpdateConfigured = 0;
 
 ## fritz box config parameters we don't like to be modified without thinking
 # the maximum number of characters that a Fritz box phone book name can have
@@ -160,6 +173,8 @@ sub check_args {
 					'v'   => \$o_verbose,     'verbose'   => \$o_verbose,
 					'c:s' => \$o_configfile,  'config:s'  => \$o_configfile
 		);
+		
+		# TODO - maybe a parameter per each client even if XXX_LAZY_UPDATE = 1
 }
 
 sub parse_config {
@@ -191,6 +206,57 @@ sub verbose{
 	if ($o_verbose && $msg) {
 		print "$msg\n";
 	}
+}
+
+
+# this is to have EGW user list '1,2,3', '1, 2, 3' and '2,   3 ,1' converted to the same value
+# otherwise different egw2fbox.conf values for the same user ids would result in not using the cached values
+sub sort_user_id_list{
+	my $user_id_string = shift;
+	verbose("sort_user_id_list() Got unsorted list: '" . $user_id_string . "'");
+	
+	# removing all wide spaces
+	$user_id_string =~ s/\s*//g;
+	
+	# if we have more than one user id
+	if($user_id_string =~ /,/) {
+		# split into a string
+		my @user_id_list = split(/,/, $user_id_string);
+		# the sort algorithm is unimportant as long as all values are sorted the same way
+		# I know that this does not sort the values in a numeric way but I don't care
+		my @user_id_list_sorted = sort @user_id_list;
+		$user_id_string = "@user_id_list_sorted";
+		$user_id_string =~ s/ /,/g;
+		
+	}
+	verbose("sort_user_id_list() Returning sorted list: '" . $user_id_string . "'");
+	return $user_id_string;
+}
+
+sub find_EGW_user {
+	my $additional_user_list = shift;
+	# value to return
+	my $egwUserForThisClient;
+	# default value, if defined
+	if($cfg->{EGW_ADDRBOOK_OWNERS}) {
+		verbose("find_EGW_user() - EGW_ADDRBOOK_OWNERS is set!");
+		$egwUserForThisClient = sort_user_id_list($cfg->{EGW_ADDRBOOK_OWNERS});
+	}
+	# specific user, if defined
+	if($cfg->{$additional_user_list}) {
+		verbose("find_EGW_user() - $additional_user_list is set!");
+		$egwUserForThisClient = sort_user_id_list($cfg->{$additional_user_list});
+	}
+	### verbose output
+	if($o_verbose) {
+		verbose("find_EGW_user() - found user list '$egwUserForThisClient'");
+		if($oldEgwTimeStamps->{$egwUserForThisClient}) {
+			verbose("find_EGW_user() - found old time stamp: '$oldEgwTimeStamps->{$egwUserForThisClient}'");
+		} else {
+			verbose("find_EGW_user() - NO old time stamp!");
+		}
+	}
+	return $egwUserForThisClient;
 }
 
 sub egw_read_db {
@@ -611,6 +677,14 @@ sub rcube_update_address_book {
 	## eGroupware data
 	my $egw_address_data = shift;
 	
+	# TODO - a good boy would force the Round Cube address book to be updated even there has not been 
+	#        any changes inside the EGW address book but some one updated the Round Cube address book 
+	#      - this is because EGW is always the master and because any changes inside Round Cube do not
+	#        make any sense and can't be synced back to EGW
+	#      - if a user likes to have his own address book in Round Cube still, he can use a global 
+	#        address book for the EGW data
+	#      ..... but, I'm not perfect!
+	
 	## DB related handles
 	my $dbh;
 	# perldoc of DBI recommends a new handle for each SQL statement
@@ -828,53 +902,119 @@ sub mutt_update_address_book {
 }
 
 
+
 #### MAIN
 check_args;
 parse_config;
-# buffer EGW database querry results
-my $cachedEgwAddressBookData;
 
-# TODO implement lazy update
-# TODO implement different address books for each client
+#### LAZY UPDATE - loading previous time stamps from EGW_LAZY_UPDATE_TIME_STAMP_FILE
+if($cfg->{EGW_LAZY_UPDATE_TIME_STAMP_FILE} &&
+    ( $cfg->{FBOX_LAZY_UPDATE} || $cfg->{RCUBE_LAZY_UPDATE} || $cfg->{MUTT_LAZY_UPDATE} )   ) {
+	$lazyUpdateConfigured = 1;
+	verbose("main() Lazy Update is configured; loading time stamps!");
+	
+	if( -r $cfg->{EGW_LAZY_UPDATE_TIME_STAMP_FILE} ) {
+		$oldEgwTimeStamps = retrieve($cfg->{EGW_LAZY_UPDATE_TIME_STAMP_FILE});
+	}
+	
+	if($o_verbose) {
+		foreach my $key ( keys(%{$oldEgwTimeStamps}) ) {
+			verbose("main() Lazy Update - Found user_id(" . $key . ") modify_time(" . $oldEgwTimeStamps->{$key} . ")");
+		}
+	}
+}
 
 ### update FritzBox address book
-if($cfg->{FBOX_EXPORT_ENABLED} && $cfg->{EGW_ADDRBOOK_OWNERS}) { 
+if($cfg->{FBOX_EXPORT_ENABLED}) {
 	verbose("main() FBOX -  START");
-	# if we did not read EGW DB already 
-	if(! exists $cachedEgwAddressBookData->{'TIME'}->{ $cfg->{EGW_ADDRBOOK_OWNERS} } ) {
-		verbose("main() FBOX - Seems we did not already read the EGW DB for this user combination!");
-		( $cachedEgwAddressBookData->{'DATA'}->{ $cfg->{EGW_ADDRBOOK_OWNERS} }, 
-		  $cachedEgwAddressBookData->{'TIME'}->{ $cfg->{EGW_ADDRBOOK_OWNERS} } ) = egw_read_db($cfg->{EGW_ADDRBOOK_OWNERS});
-	}
-	# TODO need check for "if $cachedEgwAddressBookData->{'TIME'}->{ 'user_list' } time stamp is same as at last run, do nothing"
-	# or when forced = only write if needed
-	fbox_gen_fritz_xml( $cachedEgwAddressBookData->{'DATA'}->{ $cfg->{EGW_ADDRBOOK_OWNERS} } ); 
+	if($cfg->{EGW_ADDRBOOK_OWNERS} || $cfg->{FBOX_EGW_ADDRBOOK_OWNERS}) {
+		
+		### lookup EGW users
+		my $egwUserForThisClient = find_EGW_user('FBOX_EGW_ADDRBOOK_OWNERS');
+		
+		### read database for this user combination, if not already done
+		if(! exists $cachedEgwAddressBookData->{'TIME'}->{ $egwUserForThisClient } ) {
+			verbose("main() FBOX - Seems we did not already read the EGW DB for this user combination!");
+			( $cachedEgwAddressBookData->{'DATA'}->{ $egwUserForThisClient }, 
+			  $cachedEgwAddressBookData->{'TIME'}->{ $egwUserForThisClient } ) = egw_read_db($egwUserForThisClient);
+		}
+		
+		### if lazy update is active: only generate output if old time stamp and new time stamp are different
+		# also check if MUTT_EXPORT_FILE exists and try to create it if not!
+		if(-e $cfg->{FBOX_OUTPUT_XML_FILE} && $cfg->{FBOX_LAZY_UPDATE}  && $oldEgwTimeStamps->{$egwUserForThisClient} && ($cachedEgwAddressBookData->{'TIME'}->{ $egwUserForThisClient } ==  $oldEgwTimeStamps->{$egwUserForThisClient} ) ) {
+			verbose("main() FBOX - lazy update configured and time stamp '$oldEgwTimeStamps->{$egwUserForThisClient}' didn't change since last script run!");
+			verbose("main() FBOX - doing nothing");
+		} else {
+			if($cfg->{FBOX_LAZY_UPDATE}) { verbose("main() FBOX - lazy update configured but time stamp changed to '$cachedEgwAddressBookData->{'TIME'}->{ $egwUserForThisClient }'!"); }
+			else { verbose("main() FBOX - NO lazy update configured!"); }
+			verbose("main() FBOX - update needed");
+			fbox_gen_fritz_xml( $cachedEgwAddressBookData->{'DATA'}->{ $egwUserForThisClient } );
+		}
+	} 
+	else { print "WARN: Did not find any EGW user for Fritz Box export!\nINFO: Please set EGW_ADDRBOOK_OWNERS or FBOX_EGW_ADDRBOOK_OWNERS!\n"; }
 }
 
 ### update RoundCube address book
-if($cfg->{RCUBE_EXPORT_ENABLED} && $cfg->{EGW_ADDRBOOK_OWNERS}) {
+if($cfg->{RCUBE_EXPORT_ENABLED}) {
 	verbose("main() RCUBE -  START");
-	# if we did not read EGW DB already 
-	if(! exists $cachedEgwAddressBookData->{'TIME'}->{ $cfg->{EGW_ADDRBOOK_OWNERS} } ) {
-		verbose("main() RCUBE - Seems we did not already read the EGW DB for this user combination!");
-		( $cachedEgwAddressBookData->{'DATA'}->{ $cfg->{EGW_ADDRBOOK_OWNERS} }, 
-		  $cachedEgwAddressBookData->{'TIME'}->{ $cfg->{EGW_ADDRBOOK_OWNERS} } ) = egw_read_db($cfg->{EGW_ADDRBOOK_OWNERS});
-	}
-	# TODO need check for "if $cachedEgwAddressBookData->{'TIME'}->{ 'user_list' } time stamp is same as at last run, do nothing"
-	# or when forced = only write if needed
-	rcube_update_address_book( $cachedEgwAddressBookData->{'DATA'}->{ $cfg->{EGW_ADDRBOOK_OWNERS} } ); 
+	if($cfg->{EGW_ADDRBOOK_OWNERS} || $cfg->{RCUBE_EGW_ADDRBOOK_OWNERS}) {
+		
+		### lookup EGW users
+		my $egwUserForThisClient = find_EGW_user('RCUBE_EGW_ADDRBOOK_OWNERS');
+		
+		### read database for this user combination, if not already done
+		if(! exists $cachedEgwAddressBookData->{'TIME'}->{ $egwUserForThisClient } ) {
+			verbose("main() RCUBE - Seems we did not already read the EGW DB for this user combination!");
+			( $cachedEgwAddressBookData->{'DATA'}->{ $egwUserForThisClient }, 
+			  $cachedEgwAddressBookData->{'TIME'}->{ $egwUserForThisClient } ) = egw_read_db($egwUserForThisClient);
+		}
+		
+		### if lazy update is active: only generate output if old time stamp and new time stamp are different
+		if($cfg->{RCUBE_LAZY_UPDATE}  && $oldEgwTimeStamps->{$egwUserForThisClient} && ($cachedEgwAddressBookData->{'TIME'}->{ $egwUserForThisClient } ==  $oldEgwTimeStamps->{$egwUserForThisClient} ) ) {
+			verbose("main() RCUBE - lazy update configured and time stamp '$oldEgwTimeStamps->{$egwUserForThisClient}' didn't change since last script run!");
+			verbose("main() RCUBE - doing nothing");
+		} else {
+			if($cfg->{RCUBE_LAZY_UPDATE}) { verbose("main() RCUBE - lazy update configured but time stamp changed to '$cachedEgwAddressBookData->{'TIME'}->{ $egwUserForThisClient }'!\n"); }
+			else { verbose("main() RCUBE - NO lazy update configured!"); }
+			verbose("main() RCUBE - update needed");
+			rcube_update_address_book( $cachedEgwAddressBookData->{'DATA'}->{ $egwUserForThisClient } );
+		}
+	} 
+	else { print "WARN: Did not find any EGW user for Round Cube export!\nINFO: Please set EGW_ADDRBOOK_OWNERS or RCUBE_EGW_ADDRBOOK_OWNERS!\n"; }
 }
 
 ### update MUTT address book
-if($cfg->{MUTT_EXPORT_ENABLED} && $cfg->{EGW_ADDRBOOK_OWNERS}) {
+if($cfg->{MUTT_EXPORT_ENABLED}) {
 	verbose("main() MUTT -  START");
-	# if we did not read EGW DB already 
-	if(! exists $cachedEgwAddressBookData->{'TIME'}->{ $cfg->{EGW_ADDRBOOK_OWNERS} } ) {
-		verbose("main() MUTT - Seems we did not already read the EGW DB for this user combination!");
-		( $cachedEgwAddressBookData->{'DATA'}->{ $cfg->{EGW_ADDRBOOK_OWNERS} }, 
-		  $cachedEgwAddressBookData->{'TIME'}->{ $cfg->{EGW_ADDRBOOK_OWNERS} } ) = egw_read_db($cfg->{EGW_ADDRBOOK_OWNERS});
-	}
-	# TODO need check for "if $cachedEgwAddressBookData->{'TIME'}->{ 'user_list' } time stamp is same as at last run, do nothing"
-	# or when forced = only write if needed
-	mutt_update_address_book( $cachedEgwAddressBookData->{'DATA'}->{ $cfg->{EGW_ADDRBOOK_OWNERS} } ); 
+	if($cfg->{EGW_ADDRBOOK_OWNERS} || $cfg->{MUTT_EGW_ADDRBOOK_OWNERS}) {
+		
+		### lookup EGW users
+		my $egwUserForThisClient = find_EGW_user('MUTT_EGW_ADDRBOOK_OWNERS');
+		
+		### read database for this user combination, if not already done
+		if(! exists $cachedEgwAddressBookData->{'TIME'}->{ $egwUserForThisClient } ) {
+			verbose("main() MUTT - Seems we did not already read the EGW DB for this user combination!");
+			( $cachedEgwAddressBookData->{'DATA'}->{ $egwUserForThisClient }, 
+			  $cachedEgwAddressBookData->{'TIME'}->{ $egwUserForThisClient } ) = egw_read_db($egwUserForThisClient);
+		}
+		
+		### if lazy update is active: only generate output if old time stamp and new time stamp are different
+		# also check if MUTT_EXPORT_FILE exists and try to create it if not!
+		if(-e $cfg->{MUTT_EXPORT_FILE} && $cfg->{MUTT_LAZY_UPDATE}  && $oldEgwTimeStamps->{$egwUserForThisClient} && ($cachedEgwAddressBookData->{'TIME'}->{ $egwUserForThisClient } ==  $oldEgwTimeStamps->{$egwUserForThisClient} ) ) {
+			verbose("main() MUTT - lazy update configured and time stamp '$oldEgwTimeStamps->{$egwUserForThisClient}' didn't change since last script run!");
+			verbose("main() MUTT - doing nothing");
+		} else {
+			if($cfg->{MUTT_LAZY_UPDATE}) { verbose("main() MUTT - lazy update configured but time stamp changed to '$cachedEgwAddressBookData->{'TIME'}->{ $egwUserForThisClient }'!"); }
+			else { verbose("main() MUTT - NO lazy update configured!"); }
+			verbose("main() MUTT - update needed");
+			mutt_update_address_book( $cachedEgwAddressBookData->{'DATA'}->{ $egwUserForThisClient } );
+		}
+	} 
+	else { print "WARN: Did not find any EGW user for MUTT export!\nINFO: Please set EGW_ADDRBOOK_OWNERS or MUTT_EGW_ADDRBOOK_OWNERS!\n"; }
+}
+
+### LAZY UPDATE - saving current time stamps to EGW_LAZY_UPDATE_TIME_STAMP_FILE
+if($lazyUpdateConfigured && $cachedEgwAddressBookData && $cachedEgwAddressBookData->{'TIME'}) {
+	verbose("main() Lazy Update is configured; persisting time stamps!");
+	store $cachedEgwAddressBookData->{'TIME'}, $cfg->{EGW_LAZY_UPDATE_TIME_STAMP_FILE};
 }

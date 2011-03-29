@@ -67,7 +67,7 @@ fi
 BINDIR=$(grep "CRON_BINDIR" $CONFIGFILE | sed "s/\#.*//g" | cut -d"=" -f2 |sed "s/ //g"|sed "s/\/\+$//")
 XMLFILE=$(grep "FBOX_OUTPUT_XML_FILE" $CONFIGFILE | sed "s/\#.*//g" | cut -d"=" -f2|sed "s/ //g"|sed "s/\/\+$//")
 HASHFILE=$(grep "CRON_FBOX_XML_HASH" $CONFIGFILE | sed "s/\#.*//g" | cut -d"=" -f2 |sed "s/ //g"|sed "s/\/\+$//")
-
+# TODO - maybe some checks whether BINDIR, XMLFILE and HASHFILE are valid
 
 ### DO WORK
 # create data files viewable for user only
