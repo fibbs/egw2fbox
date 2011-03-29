@@ -174,7 +174,7 @@ sub check_args {
 					'c:s' => \$o_configfile,  'config:s'  => \$o_configfile
 		);
 		
-		# TODO - maybe a parameter per each client even if XXX_LAZY_UPDATE = 1
+		# TODO - maybe a parameter per each client to force sync even if XXX_LAZY_UPDATE = 1 is set
 }
 
 sub parse_config {
