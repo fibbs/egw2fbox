@@ -33,6 +33,8 @@
 #                    column causes SQL errors. 'email', 'name', 'firstname' will never be NULL
 #                    due to the implementation. But 'surname' might.
 #                  - Checking $userId, $changed and $sth as well
+#                  - Don't let the whole script fail if $userId or $sth is NULL. Only roll back 
+#                    the Round Cube DB transaction!
 #
 # 0.7.0 2011-03-29 Kai Ellinger <coding@blicke.de>
 #                  - Lazy Update implemented
@@ -861,9 +863,10 @@ sub rcube_insert_mail_address() {
 		}
 		#$changed should always be taken from EGW DB but in case it is not set
 		if(!$changed) { $changed = time(); }
-		#this should never happen as well
-		if(!$userId) { die "ERROR: How can it be that no Round Cube user id was given?\n"; }
-		if(!$sth) { die "ERROR: How can it be that I have no SQL statement handle for the Round Cube DB?\n"; }
+		# this should never happen as well
+		# do transaction roll back!
+		if(!$userId) { print "ERROR: How can it be that no Round Cube user id was given? Doing rollback!\n"; my $pleaseRollbackSqlWork = 1/0; }
+		if(!$sth) { print "ERROR: How can it be that I have no SQL statement handle for the Round Cube DB? Doing rollback!\n"; my $pleaseRollbackSqlWork = 1/0; }
 		
 		# TODO - check field size before inserting anything into table
 		
