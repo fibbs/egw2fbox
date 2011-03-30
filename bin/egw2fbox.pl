@@ -26,6 +26,13 @@
 #       MA 02110-1301, USA.
 #
 ### CHANGELOG
+#
+# 0.7.1 2011-03-30 Kai Ellinger <coding@blicke.de>
+#                  Round Cube DB:
+#                  - Fixed bug that not set value for 'email', 'name', 'firstname' or 'surname' 
+#                    column causes SQL errors. 'email', 'name', 'firstname' will never be NULL
+#                    due to the implementation. But 'surname' might.
+#
 # 0.7.0 2011-03-29 Kai Ellinger <coding@blicke.de>
 #                  - Lazy Update implemented
 #                  - Implemented dedicated EGW user lists FBOX_EGW_ADDRBOOK_OWNERS, RCUBE_EGW_ADDRBOOK_OWNERS, MUTT_EGW_ADDRBOOK_OWNERS
@@ -845,6 +852,12 @@ sub rcube_insert_mail_address() {
 		my $changed   = shift;
 
 		$o_verbose && verbose ("rcube_insert_mail_address() RQ user id '$userId' contact '$name' mail '$email'");
+
+		# each of those DB fields must not be null, set empty string so that SQL INSERT does not fail!
+		# DB field 'email', 'name', 'firstname' will never be NULL due to the implementation. But 'surname' might.
+		foreach my $mustNotbeNull ($email, $name, $firstName, $familyName) {
+			if(!$mustNotbeNull) { $mustNotbeNull = ''; }
+		}
 		
 		# TODO - check field size before inserting anything into table
 		
@@ -854,7 +867,7 @@ sub rcube_insert_mail_address() {
 		# SQL INSERT statement execution
 		# INSERT INTO `contacts` (`email`, `name`, `firstname`, `surname`, `user_id`, `changed`)
 		# VALUES ($email, $name, $firstName, $familyName, $userId, $changed)
-		$o_verbose && verbose "rcube_insert_mail_address() SQL INSERT INTO `contacts` (`email`, `name`, `firstname`, `surname`, `user_id`, `changed`) VALUES ($email, $name, $firstName, $familyName, $userId, $changed)";
+		$o_verbose && verbose "rcube_insert_mail_address() SQL INSERT INTO `contacts` (`email`, `name`, `firstname`, `surname`, `user_id`, `changed`) VALUES ('$email', '$name', '$firstName', '$familyName', '$userId', '$changed')";
 		verbose "rcube_insert_mail_address() Returning: " . $sth->execute($email, $name, $firstName, $familyName, $userId, $changed);
 		
 }
