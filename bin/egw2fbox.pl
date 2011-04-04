@@ -1,155 +1,253 @@
 #!/usr/bin/perl
-### FILE
-#       egw2fbox.pl - reads addresses from eGroupware database
-#                   - exports them to a XML file that can be imported to
-#                     the Fritz Box phone book via Fritz Box web interface
-#                   - exports them to the Round Cube web mailer address
-#                     inside the Round Cube database
-#
-### COPYRIGHT
-#       Copyright 2011  Christian Anton <mail@christiananton.de>
-#                       Kai Ellinger <coding@blicke.de>
-#
-#       This program is free software; you can redistribute it and/or modify
-#       it under the terms of the GNU General Public License as published by
-#       the Free Software Foundation; either version 2 of the License, or
-#       (at your option) any later version.
-#       
-#       This program is distributed in the hope that it will be useful,
-#       but WITHOUT ANY WARRANTY; without even the implied warranty of
-#       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#       GNU General Public License for more details.
-#       
-#       You should have received a copy of the GNU General Public License
-#       along with this program; if not, write to the Free Software
-#       Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
-#       MA 02110-1301, USA.
-#
-### CHANGELOG
-#
-# 0.7.1 2011-03-30 Kai Ellinger <coding@blicke.de>
-#                  Round Cube DB:
-#                  - Fixed bug that not set value for 'email', 'name', 'firstname' or 'surname' 
-#                    column causes SQL errors. 'email', 'name', 'firstname' will never be NULL
-#                    due to the implementation. But 'surname' might.
-#                  - Checking $userId, $changed and $sth as well
-#                  - Don't let the whole script fail if $userId or $sth is NULL. Only roll back 
-#                    the Round Cube DB transaction!
-#
-# 0.7.0 2011-03-29 Kai Ellinger <coding@blicke.de>
-#                  - Lazy Update implemented
-#                  - Implemented dedicated EGW user lists FBOX_EGW_ADDRBOOK_OWNERS, RCUBE_EGW_ADDRBOOK_OWNERS, MUTT_EGW_ADDRBOOK_OWNERS
-#                    in addition to already existing global EGW user list EGW_ADDRBOOK_OWNERS
-#
-# 0.6.0 2011-03-28 Kai Ellinger <coding@blicke.de>
-#                  RoundCube:
-#                  - It turned out that the current state of the implementation already 
-#                    supports global address books in Round Cube. Successfully tested!
-#                  - You need to install the Round Cube plug in 'globaladdressbook' first.
-#                    Download: http://trac.roundcube.net/wiki/Plugin_Repository
-#
-#                  Cronjob.sh:
-#                  - Moving hard coded variables from cronjob.sh to egw2fbox.conf:
-#                    * CRON_FBOX_XML_HASH, CRON_FBOX_UPLOAD_SCRIPT
-#                  - Added comment awareness of config file parser in cronjob.sh
-#
-#                  Update clients only if EGW contacts changed for defined EGW user:
-#                  - Preparation of egw2fbox.conf for lazy update feature:
-#                    * EGW_LAZY_UPDATE_TIME_STAMP_FILE, FBOX_LAZY_UPDATE, RCUBE_LAZY_UPDATE, MUTT_LAZY_UPDATE
-#
-#                  Allow defining a different EGW user list for each client:
-#                  - Preparation of egw2fbox.conf for defining different EGW address book owners per each client
-#                    * FBOX_EGW_ADDRBOOK_OWNERS, RCUBE_EGW_ADDRBOOK_OWNERS, MUTT_EGW_ADDRBOOK_OWNERS
-#
-# 0.5.4 2011-03-28 Kai Ellinger <coding@blicke.de>
-#                  - Removing need for $egw_address_data being an global variable to be able to 
-#                    sync different user / group address books for different clients
-#                  - Making egw_read_db() flexible to return addresses for different address book owners
-#                  - Caching EGW addresses to avoid DB access
-#                  - egw_read_db() now retuning last modified time stamp to stop writing data to external
-#                    client if not modified since last run, if MAIN calling export routine supports this
-#
-# 0.5.3 2011-03-10 Kai Ellinger <coding@blicke.de>
-#                  - implemented SQL part of round cube address book sync but
-#                    still check field size before inserting into DB needs tbd
-#
-# 0.5.2 2011-03-08 Kai Ellinger <coding@blicke.de>
-#                  - started implementing round cube address book sync because I feel it is urgent ;-)
-#                    did not touch any SQL code, need to update all TO DOs with inserting SQL code
-#                  - remove need for $FRITZXML being a global variable
-#
-# 0.5.1 2011-03-04 Christian Anton <mail@christiananton.de>
-#                  - tidy up code to fulfill Perl::Critic tests at "gentle" severity:
-#                    http://www.perlcritic.org/
-#
-# 0.5.0 2011-03-04 Christian Anton <mail@christiananton.de>, Kai Ellinger <coding@blicke.de>
-#                  - data is requested from DB in UTF8 and explicitly converted in desired encoding
-#                    inside of fbox_write_xml_contact function
-#                  - mutt export function now writes aliases file in UTF-8 now. If you use anything
-#                    different - you're wrong!
-#                  - fixed bug: for private contact entries in FritzBox the home number was taken from
-#                    database field tel_work instead of tel_home
-#                  - extended fbox_reformatTelNr to support local phone number annotation to work around
-#                    inability of FritzBox to rewrite phone number for incoming calls
-#
-# 0.4.0 2011-03-02 Kai Ellinger <coding@blicke.de>
-#                  - added support for mutt address book including an example file showing 
-#                    how to configure ~/.muttrc to support a local address book and a global
-#                    EGW address book
-#                  - replaced time stamp in fritz box xml with real time stamp from database
-#                    this feature is more interesting for round cube integration where we have
-#                    a time stamp field in the round cube database
-#                  - added some comments
-#
-# 0.3.0 2011-02-26 Kai Ellinger <coding@blicke.de>
-#                  - Verbose function:
-#                    * only prints if data was provided
-#                    * avoiding unnecessary verbose function calls
-#                    * avoiding runtime errors due to uninitialized data in verbose mode
-#                  - Respect that Fritzbox address book names can only have 25 characters
-#                  - EGW address book to Fritz Box phone book mapping:
-#                    The Fritz Box Phone book knows 3 different telephone number types:
-#                      'work', 'home' and 'mobile'
-#                    Each Fritz Box phone book entry can have up to 3 phone numbers.
-#                    All 1-3 phone numbers can be of same type or different types.
-#                    * Compact mode (if one EGW address has 1-3 phone numbers):
-#                       EGW field tel_work          -> FritzBox field type 'work'
-#                       EGW field tel_cell          -> FritzBox field type 'mobile'
-#                       EGW field tel_assistent     -> FritzBox field type 'work'
-#                       EGW field tel_home          -> FritzBox field type 'home'
-#                       EGW field tel_cell_private  -> FritzBox field type 'mobile'
-#                       EGW field tel_other         -> FritzBox field type 'home'
-#                      NOTE: Because we only have 3 phone numbers, we stick on the right number types.
-#                    * Business Fritz Box phone book entry (>3 phone numbers):
-#                       EGW field tel_work          -> FritzBox field type 'work'
-#                       EGW field tel_cell          -> FritzBox field type 'mobile'
-#                       EGW field tel_assistent     -> FritzBox field type 'home'
-#                      NOTE: On hand sets, the list order is work, mobile, home. That's why the
-#                            most important number is 'work' and the less important is 'home' here.
-#                    * Private Fritz Box phone book entry (>3 phone numbers):
-#                       EGW field tel_home          -> FritzBox field type 'work'
-#                       EGW field tel_cell_private  -> FritzBox field type 'mobile'
-#                       EGW field tel_other         -> FritzBox field type 'home'
-#                      NOTE: On hand sets, the list order is work, mobile, home. That's why the
-#                            most important number is 'work' and the less important is 'home' here.
-#                   - Added EGW DB connect string check
-#                   - All EGW functions have now prefix 'egw_', all Fritz Box functions prefix
-#                     'fbox_' and all Round Cube functions 'rcube_' to prepare the source for
-#                     adding the round cube sync.
-#
-# 0.2.0 2011-02-25 Christian Anton <mail@christiananton.de>
-#                  implementing XML-write as an extra function and implementing COMPACT_MODE which
-#                  omits creating two contact entries for contacts which have only up to three numbers
-#
-# 0.1.0 2011-02-24 Kai Ellinger <coding@blicke.de>, Christian Anton <mail@christiananton.de>
-#                  Initial version of this script, ready for world domination ;-)
+##### START: Documentation HEAD in POD format #####
+=pod
+
+=head1 NAME
+
+egw2fbox.pl
+
+=head1 DESCRIPTION
+
+B<This program> reads phone numbers and e-mail addresses from the eGroupware database table 'contacts' and exports them to other clients.
+
+Currently supported clients are:
+
+=over 3
+
+=item phone numbers:
+
+- Fritz Box router address book
+
+=item e-mail addresses:
+
+- Round Cube web mailer including personal and global address book
+
+- MUTT command line mail client
+
+=back
+
+For uploading the created XML address book to a Fritz Box a small perl script called FritzUploader from Jan-Piet Mens is used.
+
+=head1 SYNOPSIS
+
+egw2fbox.pl [--verbose] [-v] [--config filename.ini] [-c filename.ini] [--version] [--help] [-h] [-?] [--man] [--changelog]
+
+=head1 OPTIONS
+
+Runtime:
+
+=over 15
+
+=item --verbose -v
+
+Logs to STDOUT while executing the script.
+
+=item --config filename.ini   -c filename.ini
+
+File name containing all configuration.
+
+See sections CONFIG FILE and TUTORIALS for further information.
+
+=back
+
+Documentation:
+
+=over 15
+
+=item --version
+
+Prints the version numbers.
+
+=item --help -h -?
+
+Print a brief help message.
+
+=item --man
+
+Prints the complete manual page.
+
+=item --changelog
+
+Prints the change log.
+
+=back
+
+=head1 COPYRIGHT AND LICENSE
+
+Copyright 2011 by Christian Anton <mail@christiananton.de>, Kai Ellinger <coding@blicke.de>
+
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+MA 02110-1301, USA.
+
+=cut
+# What is my current version number?
+# For compatibility reasons use 0.01.02 instead of 0.1.2 
+BEGIN { $VERSION = "0.08.00"; }
+=pod
+
+=head1 HISTORY
+
+ 0.08.00 2011-04-05 Kai Ellinger <coding@blicke.de>
+       Documentation:
+       - Started implementing the documentation via perlpod
+       - Implemented command line options:
+         [--version] [--help] [-h] [-?] [--man] [--changelog]
+
+ 0.07.01 2011-03-30 Kai Ellinger <coding@blicke.de>
+       Round Cube DB:
+       - Fixed bug that not set value for 'email', 'name', 'firstname' or 'surname' 
+         column causes SQL errors. 'email', 'name', 'firstname' will never be NULL
+         due to the implementation. But 'surname' might.
+       - Checking $userId, $changed and $sth as well
+       - Don't let the whole script fail if $userId or $sth is NULL. Only roll back 
+         the Round Cube DB transaction!
+
+ 0.07.00 2011-03-29 Kai Ellinger <coding@blicke.de>
+       - Lazy Update implemented
+       - Implemented dedicated EGW user lists FBOX_EGW_ADDRBOOK_OWNERS, RCUBE_EGW_ADDRBOOK_OWNERS, MUTT_EGW_ADDRBOOK_OWNERS
+         in addition to already existing global EGW user list EGW_ADDRBOOK_OWNERS
+
+ 0.06.00 2011-03-28 Kai Ellinger <coding@blicke.de>
+       RoundCube:
+       - It turned out that the current state of the implementation already 
+         supports global address books in Round Cube. Successfully tested!
+       - You need to install the Round Cube plug in 'globaladdressbook' first.
+         Download: http://trac.roundcube.net/wiki/Plugin_Repository
+
+       Cronjob.sh:
+       - Moving hard coded variables from cronjob.sh to egw2fbox.conf:
+          * CRON_FBOX_XML_HASH, CRON_FBOX_UPLOAD_SCRIPT
+       - Added comment awareness of config file parser in cronjob.sh
+
+       Update clients only if EGW contacts changed for defined EGW user:
+       - Preparation of egw2fbox.conf for lazy update feature:
+          * EGW_LAZY_UPDATE_TIME_STAMP_FILE, FBOX_LAZY_UPDATE, RCUBE_LAZY_UPDATE, MUTT_LAZY_UPDATE
+
+       Allow defining a different EGW user list for each client:
+       - Preparation of egw2fbox.conf for defining different EGW address book owners per each client
+          * FBOX_EGW_ADDRBOOK_OWNERS, RCUBE_EGW_ADDRBOOK_OWNERS, MUTT_EGW_ADDRBOOK_OWNERS
+
+ 0.05.04 2011-03-28 Kai Ellinger <coding@blicke.de>
+       - Removing need for $egw_address_data being an global variable to be able to 
+         sync different user / group address books for different clients
+       - Making egw_read_db() flexible to return addresses for different address book owners
+       - Caching EGW addresses to avoid DB access
+       - egw_read_db() now retuning last modified time stamp to stop writing data to external
+         client if not modified since last run, if MAIN calling export routine supports this
+
+ 0.05.03 2011-03-10 Kai Ellinger <coding@blicke.de>
+       - implemented SQL part of round cube address book sync but
+         still check field size before inserting into DB needs tbd
+
+ 0.05.02 2011-03-08 Kai Ellinger <coding@blicke.de>
+       - started implementing round cube address book sync because I feel it is urgent ;-)
+         did not touch any SQL code, need to update all TO DOs with inserting SQL code
+       - remove need for $FRITZXML being a global variable
+
+ 0.05.01 2011-03-04 Christian Anton <mail@christiananton.de>
+       - tidy up code to fulfill Perl::Critic tests at "gentle" severity:
+       http://www.perlcritic.org/
+
+ 0.05.00 2011-03-04 Christian Anton <mail@christiananton.de>, Kai Ellinger <coding@blicke.de>
+       - data is requested from DB in UTF8 and explicitly converted in desired encoding
+         inside of fbox_write_xml_contact function
+       - mutt export function now writes aliases file in UTF-8 now. If you use anything
+         different - you're wrong!
+       - fixed bug: for private contact entries in FritzBox the home number was taken from
+         database field tel_work instead of tel_home
+       - extended fbox_reformatTelNr to support local phone number annotation to work around
+         inability of FritzBox to rewrite phone number for incoming calls
+
+ 0.04.00 2011-03-02 Kai Ellinger <coding@blicke.de>
+       - added support for mutt address book including an example file showing 
+         how to configure ~/.muttrc to support a local address book and a global
+         EGW address book
+       - replaced time stamp in fritz box xml with real time stamp from database
+         this feature is more interesting for round cube integration where we have
+         a time stamp field in the round cube database
+       - added some comments
+
+ 0.03.00 2011-02-26 Kai Ellinger <coding@blicke.de>
+       - Verbose function:
+          * only prints if data was provided
+          * avoiding unnecessary verbose function calls
+          * avoiding runtime errors due to uninitialized data in verbose mode
+       - Respect that Fritzbox address book names can only have 25 characters
+       - EGW address book to Fritz Box phone book mapping:
+         The Fritz Box Phone book knows 3 different telephone number types:
+           'work', 'home' and 'mobile'
+         Each Fritz Box phone book entry can have up to 3 phone numbers.
+         All 1-3 phone numbers can be of same type or different types.
+         * Compact mode (if one EGW address has 1-3 phone numbers):
+            EGW field tel_work          -> FritzBox field type 'work'
+            EGW field tel_cell          -> FritzBox field type 'mobile'
+            EGW field tel_assistent     -> FritzBox field type 'work'
+            EGW field tel_home          -> FritzBox field type 'home'
+            EGW field tel_cell_private  -> FritzBox field type 'mobile'
+            EGW field tel_other         -> FritzBox field type 'home'
+           NOTE: Because we only have 3 phone numbers, we stick on the right number types.
+         * Business Fritz Box phone book entry (>3 phone numbers):
+            EGW field tel_work          -> FritzBox field type 'work'
+            EGW field tel_cell          -> FritzBox field type 'mobile'
+            EGW field tel_assistent     -> FritzBox field type 'home'
+           NOTE: On hand sets, the list order is work, mobile, home. That's why the
+                 most important number is 'work' and the less important is 'home' here.
+         * Private Fritz Box phone book entry (>3 phone numbers):
+            EGW field tel_home          -> FritzBox field type 'work'
+            EGW field tel_cell_private  -> FritzBox field type 'mobile'
+            EGW field tel_other         -> FritzBox field type 'home'
+           NOTE: On hand sets, the list order is work, mobile, home. That's why the
+                 most important number is 'work' and the less important is 'home' here.
+        - Added EGW DB connect string check
+        - All EGW functions have now prefix 'egw_', all Fritz Box functions prefix
+          'fbox_' and all Round Cube functions 'rcube_' to prepare the source for
+          adding the round cube sync.
+
+ 0.02.00 2011-02-25 Christian Anton <mail@christiananton.de>
+          implementing XML-write as an extra function and implementing COMPACT_MODE which
+          omits creating two contact entries for contacts which have only up to three numbers
+
+ 0.01.00 2011-02-24 Kai Ellinger <coding@blicke.de>, Christian Anton <mail@christiananton.de>
+          Initial version of this script, ready for world domination ;-)
+
+=head1 API
+
+=cut
+##### END: Documentation HEAD in POD format #####
+
 
 #### modules
+
+##### START: perl module requirements ##### 
+=pod
+
+=head2 Required Perl modules
+
+Most Perl modules used by this program are part of the standard perl library perlmodlib L<http://perldoc.perl.org/perlmodlib.html> and are installed by default.
+
+The only modules that might not be available by default are to access the MySQL database and are named DBI and DBD::Mysql.
+
+=cut
+##### END: perl module requirements #####
 # see http://perldoc.perl.org/perlmodlib.html for what is provided via perlmodlib
 use warnings;     # installed by default via perlmodlib
 use strict;       # installed by default via perlmodlib
-use Getopt::Long; # installed by default via perlmodlib
-use DBI;          # not included in perlmodlib: DBI and DBI::Mysql needs to be installed if not already done
+
+use Getopt::Long qw(:config autoversion); # installed by default via perlmodlib
+use Pod::Usage;   # installed by default via perlmodlib
+use DBI;          # not included in perlmodlib: DBI and DBD::Mysql needs to be installed if not already done
 use Data::Dumper;            # installed by default via perlmodlib
 use List::Util qw [min max]; # installed by default via perlmodlib
 use Encode;       # installed by default via perlmodlib
@@ -176,23 +274,78 @@ my $FboxMaxLenghtForName = 32;
 my $FboxAsciiCodeTable = "iso-8859-1"; #
 
 
-#### functions
+#### function section
+
+##### START: function documentation ##### 
+=pod
+
+=head2 Function check_args ()
+
+- checking command line parameters and printing help messages
+
+IN: No parameter
+
+OUT: Returns nothing
+
+=cut
+##### END: function documentation #####
 sub check_args {
-				Getopt::Long::Configure ("bundling");
-				GetOptions(
-					'v'   => \$o_verbose,     'verbose'   => \$o_verbose,
-					'c:s' => \$o_configfile,  'config:s'  => \$o_configfile
+	my $o_info_help = 0;
+	my $o_info_changelog = 0;
+	my $o_info_man = 0;
+	
+	Getopt::Long::Configure ("bundling");
+	#if(!
+		GetOptions(
+			'v'   => \$o_verbose,     'verbose'   => \$o_verbose,
+			'c:s' => \$o_configfile,  'config:s'  => \$o_configfile,
+			# don't need to check for 'version|v' if using Getopt::Long qw(:config autoversion) which includes POD and Perl version as well
+			# could use Getopt::Long qw(:config autohelp) here but like to include OPTIONS section
+			'help|h|?' => \$o_info_help,
+			'changelog' => \$o_info_changelog,
+			'man' => \$o_info_man
 		);
-		
-		# TODO - maybe a parameter per each client to force sync even if XXX_LAZY_UPDATE = 1 is set
+	#)
+	### print help on option error or no option
+	#{ pod2usage(-verbose => 99, -sections => "NAME|SYNOPSIS|OPTIONS"); }
+	
+	### print help if requested
+	pod2usage(-verbose => 99, -sections => "NAME|SYNOPSIS|OPTIONS") if ($o_info_help);
+	
+	### version is implemented by Getopt::Long qw(:config autoversion)
+	
+	### change log
+	pod2usage(-verbose => 99, -sections => "NAME|HISTORY") if($o_info_changelog);
+	
+	### complete man page
+	pod2usage(-verbose => 2) if ($o_info_man);
+	
+	# TODO - maybe a parameter per each client to force sync even if XXX_LAZY_UPDATE = 1 is set
 }
 
+##### START: function documentation ##### 
+=pod
+
+=head2 Function parse_config ()
+
+- config file given via command line option '-c filename.ini'
+
+IN: No parameter
+
+OUT: Returns nothing
+
+=cut
+##### END: function documentation #####
 sub parse_config {
 	# - we are not using perl module Config::Simple here because it was not installed
 	#   on our server by default and we saw compile errors when trying to install it via CPAN
 	# - we decided to implement our own config file parser to keep the installation simple 
 	#   and let the script run with as less dependencies as possible
-	open (my $CFGFILE, '<', "$o_configfile") or die "could not open config file: $!";
+	my $CFGFILE;
+	if(! open ($CFGFILE, '<', "$o_configfile") ) {
+		warn "ERROR: could not open config file '$o_configfile': $!\n\n";
+		pod2usage(-verbose => 99, -sections => "NAME|SYNOPSIS");
+	} # changed to return a usage info in case no or a wrong file name was given
 
 	while(defined(my $line = <$CFGFILE>) )
 	{
@@ -211,6 +364,19 @@ sub parse_config {
 
 }
 
+##### START: function documentation ##### 
+=pod
+
+=head2 Function verbose (STRING message)
+
+- printing out verbose messages if verbose mode is enabled
+
+IN: Takes the message to print out
+
+OUT: Returns nothing
+
+=cut
+##### END: function documentation #####
 sub verbose{
 	my $msg = shift;
 	if ($o_verbose && $msg) {
@@ -1005,6 +1171,7 @@ if($cfg->{RCUBE_EXPORT_ENABLED}) {
 	else { print "WARN: Did not find any EGW user for Round Cube export!\nINFO: Please set EGW_ADDRBOOK_OWNERS or RCUBE_EGW_ADDRBOOK_OWNERS!\n"; }
 }
 
+
 ### update MUTT address book
 if($cfg->{MUTT_EXPORT_ENABLED}) {
 	verbose("main() MUTT -  START");
@@ -1040,3 +1207,66 @@ if($lazyUpdateConfigured && $cachedEgwAddressBookData && $cachedEgwAddressBookDa
 	verbose("main() Lazy Update is configured; persisting time stamps!");
 	store $cachedEgwAddressBookData->{'TIME'}, $cfg->{EGW_LAZY_UPDATE_TIME_STAMP_FILE};
 }
+
+__END__
+##### START: Documentation TAIL in POD format #####
+=pod
+
+=head1 CONFIG FILE
+
+This section describes the structure of the INI file used by this script. 
+
+The default value is 'egw2fbox.conf'. 
+
+The file name can be set via command line option '-config /path/to/fileName.ini'.
+
+=head2 eGoupware section
+
+TBD
+
+=head2 FritzBox section
+
+TBD
+
+=head2 Round Cube section
+
+TBD
+
+=head2 MUTT section
+
+TBD
+
+=head1 TUTORIALS
+
+A set of small tutorials for writing the supported client address books with data from Egroupware.
+
+=head2 Setting up the FritzBox address book
+
+TBD
+
+=head2 Setting up the Round Cube address book
+
+TBD
+
+=head2 Setting up the MUTT address book
+
+TBD
+
+=head1 AUTHORS
+
+Christian Anton <mail@christiananton.de>
+
+Kai Ellinger <coding@blicke.de>
+
+=head1 SEE ALSO
+
+- Fritz Box router product family from AVM L<http://www.avm.de/en/Produkte/FRITZBox/index.html>
+
+- FritzUploader to upload XML address books to a Fritz Box from Jan-Piet Mens L<http://blog.fupps.com/2010/06/25/upload-phonebook-to-a-fritzbox-from-the-command-line> 
+
+- Round Cube Web based mail client L<http://roundcube.net>
+
+- MUTT command line mail client L<http://www.mutt.org>
+
+=cut
+##### END: Documentation TAIL in POD format #####
