@@ -281,7 +281,7 @@ my $FboxAsciiCodeTable = "iso-8859-1"; #
 
 =head2 Function check_args ()
 
-- checking command line parameters and printing help messages
+This function is checking command line options and printing help messages if requested.
 
 IN: No parameter
 
@@ -299,7 +299,7 @@ sub check_args {
 		GetOptions(
 			'v'   => \$o_verbose,     'verbose'   => \$o_verbose,
 			'c:s' => \$o_configfile,  'config:s'  => \$o_configfile,
-			# don't need to check for 'version|v' if using Getopt::Long qw(:config autoversion) which includes POD and Perl version as well
+			# don't need to check for 'version|v' if using Getopt::Long qw(:config autoversion) and not implementing those options myself
 			# could use Getopt::Long qw(:config autohelp) here but like to include OPTIONS section
 			'help|h|?' => \$o_info_help,
 			'changelog' => \$o_info_changelog,
@@ -328,7 +328,7 @@ sub check_args {
 
 =head2 Function parse_config ()
 
-- config file given via command line option '-c filename.ini'
+This function is parsing the config file given by command line option '-c filename.ini'.
 
 IN: No parameter
 
@@ -369,7 +369,7 @@ sub parse_config {
 
 =head2 Function verbose (STRING message)
 
-- printing out verbose messages if verbose mode is enabled
+Printing out verbose messages if verbose mode is enabled.
 
 IN: Takes the message to print out
 
@@ -384,7 +384,26 @@ sub verbose{
 	}
 }
 
+##### START: function documentation ##### 
+=pod
 
+=head2 Function sort_user_id_list (STRING user_id_list)
+
+This function is called by function find_EGW_user (STRING user_id_list) to sort 
+the user list it looked up before.
+
+This is needed to avoid unnecessary database accesses even the config parameters EGW_ADDRBOOK_OWNERS, 
+FBOX_EGW_ADDRBOOK_OWNERS, RCUBE_EGW_ADDRBOOK_OWNERS and MUTT_EGW_ADDRBOOK_OWNERS list 
+the user ids in different order and with different wide spaces.
+
+The default Perl sort algorithm is used even if it is not a numeric algorithm. But this is not needed anyway.
+
+IN: Takes an unsorted user id list string
+
+OUT: Returns a sorted user id list string
+
+=cut
+##### END: function documentation #####
 # this is to have EGW user list '1,2,3', '1, 2, 3' and '2,   3 ,1' converted to the same value
 # otherwise different egw2fbox.conf values for the same user ids would result in not using the cached values
 sub sort_user_id_list{
@@ -409,6 +428,22 @@ sub sort_user_id_list{
 	return $user_id_string;
 }
 
+##### START: function documentation ##### 
+=pod
+
+=head2 Function find_EGW_user (STRING config_parameter_for_private_config_section)
+
+This function returns a sorted user id list string that is either defined by the global 
+configuration parameter EGW_ADDRBOOK_OWNERS or one of the parameters
+FBOX_EGW_ADDRBOOK_OWNERS, RCUBE_EGW_ADDRBOOK_OWNERS and MUTT_EGW_ADDRBOOK_OWNERS
+to overwrite the global parameter.
+
+IN: Takes the name of the config parameter FBOX_EGW_ADDRBOOK_OWNERS, RCUBE_EGW_ADDRBOOK_OWNERS or MUTT_EGW_ADDRBOOK_OWNERS
+
+OUT: Returns a sorted user id list string
+
+=cut
+##### END: function documentation #####
 sub find_EGW_user {
 	my $additional_user_list = shift;
 	# value to return
@@ -1211,6 +1246,12 @@ if($lazyUpdateConfigured && $cachedEgwAddressBookData && $cachedEgwAddressBookDa
 __END__
 ##### START: Documentation TAIL in POD format #####
 =pod
+
+=head1 INSTALLATION
+
+Steps to install coming here.
+
+TBD
 
 =head1 CONFIG FILE
 
