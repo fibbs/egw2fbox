@@ -431,14 +431,14 @@ sub sort_user_id_list{
 ##### START: function documentation ##### 
 =pod
 
-=head2 Function find_EGW_user (STRING config_parameter_for_private_config_section)
+=head2 Function find_EGW_user (STRING config_parameter)
 
 This function returns a sorted user id list string that is either defined by the global 
 configuration parameter EGW_ADDRBOOK_OWNERS or one of the parameters
 FBOX_EGW_ADDRBOOK_OWNERS, RCUBE_EGW_ADDRBOOK_OWNERS and MUTT_EGW_ADDRBOOK_OWNERS
 to overwrite the global parameter.
 
-IN: Takes the name of the config parameter FBOX_EGW_ADDRBOOK_OWNERS, RCUBE_EGW_ADDRBOOK_OWNERS or MUTT_EGW_ADDRBOOK_OWNERS
+IN: Config parameter name FBOX_EGW_ADDRBOOK_OWNERS, RCUBE_EGW_ADDRBOOK_OWNERS or MUTT_EGW_ADDRBOOK_OWNERS
 
 OUT: Returns a sorted user id list string
 
@@ -470,6 +470,23 @@ sub find_EGW_user {
 	return $egwUserForThisClient;
 }
 
+##### START: function documentation ##### 
+=pod
+
+=head2 Function egw_read_db (STRING user_id_list)
+
+Connects to eGroupware database and looks up address book values for the given user id list including time stamp of last change.
+
+IN: User id list to lookup
+
+OUT: Returns two parameters:
+
+- all address data belonging to the user list
+
+- the time stamp when this list was modified the last time
+
+=cut
+##### END: function documentation #####
 sub egw_read_db {
 	# List of owners to return address book entries for
 	my $egw_user_name_list = shift;
@@ -635,6 +652,29 @@ sub egw_read_db {
 	return $egw_address_data, $egw_address_modified;
 }
 
+
+##### START: function documentation ##### 
+=pod
+
+=head2 Function fbox_reformatTelNr (STRING phone_number)
+
+This is a helper function called by function fbox_write_xml_contact format the phone number in a way that the Fritz Box can resolve it.
+How the phone number is formatted exactly is defined in the fritz box configuration section of the config file. 
+
+First, each phone number is re-formatted like 00498912345678. Later the phone numbers with the same country code or with the same area code 
+get the leading numbers removed if configured. 
+
+This is needed because the Fritz Box can not recognize that phone number 00498912345678 is the same as 08912345678 calling from the 
+same country is the same as 12345678 calling from the same city. But the right phone number syntax is very important to get the names 
+resolved for incoming calls as well as to replace the phone numbers with the names in the phone call protocols maintain
+that can either be viewed via web console or mail. Same is true for the incoming mail box calls that can be forwarded via e-mail as well.
+
+IN: Phone number in any format it can exist in eGrouware
+
+OUT: Phone number formatted in a way that the Fritz Box can resolve incoming calls correctly
+
+=cut
+##### END: function documentation #####
 sub fbox_reformatTelNr {
 	my $nr = shift;
 
@@ -679,6 +719,30 @@ sub fbox_reformatTelNr {
 	return $nr;
 }
 
+##### START: function documentation ##### 
+=pod
+
+=head2 Function fbox_write_xml_contact (HANDLE xml_file, STRING contact_name, STRING contact_name_suffix, ARRAY REF phone_numbers, NUMBER timestamp)
+
+This is a function called by function fbox_gen_fritz_xml for each single contact that needs to be written to the 
+XML file. The contact name is formatted to fit into the restrictions of  the Fritz Box and the phones connected to it.
+
+IN: 
+
+- handle for XML file
+
+- contact_name
+
+- contact_name_suffix = shift;
+
+- array ref with all phone numbers
+
+- timestamp of last update in eGroupware DB
+
+OUT: Nothing
+
+=cut
+##### END: function documentation #####
 sub fbox_write_xml_contact {
 	my $FRITZXML = shift;
 	my $contact_name = shift;
@@ -724,6 +788,26 @@ sub fbox_write_xml_contact {
 	print $FRITZXML "<services /><setup /><mod_time>$now_timestamp</mod_time></contact>";
 }
 
+##### START: function documentation ##### 
+=pod
+
+=head2 Function fbox_count_contacts_numbers (HASH REF egw_address_data, STRING key_to_search)
+
+This is a function called by function fbox_gen_fritz_xml for each single contact found in the eGroupware address book to 
+know how many phone numbers this contact has. If there are no phone numbers, this contact must not imported to the Fritz Box.
+If there are more than 3 phone numbers, the contact must be split into a business contact and a private contact because
+the Fritz Box can only hold 3 phone numbers per contact.
+
+IN: 
+
+- HASH REF the address list to search
+
+- STRING key of the address that needs to be searched from the list
+
+OUT: NUMBER count of found phone numbers
+
+=cut
+##### END: function documentation #####
 sub fbox_count_contacts_numbers {
 	my $egw_address_data = shift;
 	my $key = shift;
@@ -739,6 +823,20 @@ sub fbox_count_contacts_numbers {
 	return $count;
 }
 
+
+##### START: function documentation ##### 
+=pod
+
+=head2 Function fbox_gen_fritz_xml (HASH REF egw_address_data)
+
+This function creates the XML file to upload to the Fritz Box.
+
+IN: HASH REF the address list
+
+OUT: Nothing
+
+=cut
+##### END: function documentation #####
 sub fbox_gen_fritz_xml {
 	## eGroupware
 	my $egw_address_data = shift;
