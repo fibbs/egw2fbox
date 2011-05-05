@@ -1,0 +1,131 @@
+Name:
+    egw2fbox.pl
+
+History:
+                                      0.08.01 2011-05-05 Kai Ellinger <coding@blicke.de>
+                                            Documentation:
+                                            - Finished API docs
+
+                                      0.08.00 2011-04-05 Kai Ellinger <coding@blicke.de>
+                                            Documentation:
+                                            - Started implementing the documentation via perlpod
+                                            - Implemented command line options:
+                                              [--version] [--help] [-h] [-?] [--man] [--changelog]
+
+                                      0.07.01 2011-03-30 Kai Ellinger <coding@blicke.de>
+                                            Round Cube DB:
+                                            - Fixed bug that not set value for 'email', 'name', 'firstname' or 'surname' 
+                                              column causes SQL errors. 'email', 'name', 'firstname' will never be NULL
+                                              due to the implementation. But 'surname' might.
+                                            - Checking $userId, $changed and $sth as well
+                                            - Don't let the whole script fail if $userId or $sth is NULL. Only roll back 
+                                              the Round Cube DB transaction!
+
+                                      0.07.00 2011-03-29 Kai Ellinger <coding@blicke.de>
+                                            - Lazy Update implemented
+                                            - Implemented dedicated EGW user lists FBOX_EGW_ADDRBOOK_OWNERS, RCUBE_EGW_ADDRBOOK_OWNERS, MUTT_EGW_ADDRBOOK_OWNERS
+                                              in addition to already existing global EGW user list EGW_ADDRBOOK_OWNERS
+
+                                      0.06.00 2011-03-28 Kai Ellinger <coding@blicke.de>
+                                            RoundCube:
+                                            - It turned out that the current state of the implementation already 
+                                              supports global address books in Round Cube. Successfully tested!
+                                            - You need to install the Round Cube plug in 'globaladdressbook' first.
+                                              Download: http://trac.roundcube.net/wiki/Plugin_Repository
+
+                                            Cronjob.sh:
+                                            - Moving hard coded variables from cronjob.sh to egw2fbox.conf:
+                                               * CRON_FBOX_XML_HASH, CRON_FBOX_UPLOAD_SCRIPT
+                                            - Added comment awareness of config file parser in cronjob.sh
+
+                                            Update clients only if EGW contacts changed for defined EGW user:
+                                            - Preparation of egw2fbox.conf for lazy update feature:
+                                               * EGW_LAZY_UPDATE_TIME_STAMP_FILE, FBOX_LAZY_UPDATE, RCUBE_LAZY_UPDATE, MUTT_LAZY_UPDATE
+
+                                            Allow defining a different EGW user list for each client:
+                                            - Preparation of egw2fbox.conf for defining different EGW address book owners per each client
+                                               * FBOX_EGW_ADDRBOOK_OWNERS, RCUBE_EGW_ADDRBOOK_OWNERS, MUTT_EGW_ADDRBOOK_OWNERS
+
+                                      0.05.04 2011-03-28 Kai Ellinger <coding@blicke.de>
+                                            - Removing need for $egw_address_data being an global variable to be able to 
+                                              sync different user / group address books for different clients
+                                            - Making egw_read_db() flexible to return addresses for different address book owners
+                                            - Caching EGW addresses to avoid DB access
+                                            - egw_read_db() now retuning last modified time stamp to stop writing data to external
+                                              client if not modified since last run, if MAIN calling export routine supports this
+
+                                      0.05.03 2011-03-10 Kai Ellinger <coding@blicke.de>
+                                            - implemented SQL part of round cube address book sync but
+                                              still check field size before inserting into DB needs tbd
+
+                                      0.05.02 2011-03-08 Kai Ellinger <coding@blicke.de>
+                                            - started implementing round cube address book sync because I feel it is urgent ;-)
+                                              did not touch any SQL code, need to update all TO DOs with inserting SQL code
+                                            - remove need for $FRITZXML being a global variable
+
+                                      0.05.01 2011-03-04 Christian Anton <mail@christiananton.de>
+                                            - tidy up code to fulfill Perl::Critic tests at "gentle" severity:
+                                            http://www.perlcritic.org/
+
+                                      0.05.00 2011-03-04 Christian Anton <mail@christiananton.de>, Kai Ellinger <coding@blicke.de>
+                                            - data is requested from DB in UTF8 and explicitly converted in desired encoding
+                                              inside of fbox_write_xml_contact function
+                                            - mutt export function now writes aliases file in UTF-8 now. If you use anything
+                                              different - you're wrong!
+                                            - fixed bug: for private contact entries in FritzBox the home number was taken from
+                                              database field tel_work instead of tel_home
+                                            - extended fbox_reformatTelNr to support local phone number annotation to work around
+                                              inability of FritzBox to rewrite phone number for incoming calls
+
+                                      0.04.00 2011-03-02 Kai Ellinger <coding@blicke.de>
+                                            - added support for mutt address book including an example file showing 
+                                              how to configure ~/.muttrc to support a local address book and a global
+                                              EGW address book
+                                            - replaced time stamp in fritz box xml with real time stamp from database
+                                              this feature is more interesting for round cube integration where we have
+                                              a time stamp field in the round cube database
+                                            - added some comments
+
+                                      0.03.00 2011-02-26 Kai Ellinger <coding@blicke.de>
+                                            - Verbose function:
+                                               * only prints if data was provided
+                                               * avoiding unnecessary verbose function calls
+                                               * avoiding runtime errors due to uninitialized data in verbose mode
+                                            - Respect that Fritzbox address book names can only have 25 characters
+                                            - EGW address book to Fritz Box phone book mapping:
+                                              The Fritz Box Phone book knows 3 different telephone number types:
+                                                'work', 'home' and 'mobile'
+                                              Each Fritz Box phone book entry can have up to 3 phone numbers.
+                                              All 1-3 phone numbers can be of same type or different types.
+                                              * Compact mode (if one EGW address has 1-3 phone numbers):
+                                                 EGW field tel_work          -> FritzBox field type 'work'
+                                                 EGW field tel_cell          -> FritzBox field type 'mobile'
+                                                 EGW field tel_assistent     -> FritzBox field type 'work'
+                                                 EGW field tel_home          -> FritzBox field type 'home'
+                                                 EGW field tel_cell_private  -> FritzBox field type 'mobile'
+                                                 EGW field tel_other         -> FritzBox field type 'home'
+                                                NOTE: Because we only have 3 phone numbers, we stick on the right number types.
+                                              * Business Fritz Box phone book entry (>3 phone numbers):
+                                                 EGW field tel_work          -> FritzBox field type 'work'
+                                                 EGW field tel_cell          -> FritzBox field type 'mobile'
+                                                 EGW field tel_assistent     -> FritzBox field type 'home'
+                                                NOTE: On hand sets, the list order is work, mobile, home. That's why the
+                                                      most important number is 'work' and the less important is 'home' here.
+                                              * Private Fritz Box phone book entry (>3 phone numbers):
+                                                 EGW field tel_home          -> FritzBox field type 'work'
+                                                 EGW field tel_cell_private  -> FritzBox field type 'mobile'
+                                                 EGW field tel_other         -> FritzBox field type 'home'
+                                                NOTE: On hand sets, the list order is work, mobile, home. That's why the
+                                                      most important number is 'work' and the less important is 'home' here.
+                                             - Added EGW DB connect string check
+                                             - All EGW functions have now prefix 'egw_', all Fritz Box functions prefix
+                                               'fbox_' and all Round Cube functions 'rcube_' to prepare the source for
+                                               adding the round cube sync.
+
+                                      0.02.00 2011-02-25 Christian Anton <mail@christiananton.de>
+                                               implementing XML-write as an extra function and implementing COMPACT_MODE which
+                                               omits creating two contact entries for contacts which have only up to three numbers
+
+                                      0.01.00 2011-02-24 Kai Ellinger <coding@blicke.de>, Christian Anton <mail@christiananton.de>
+                                               Initial version of this script, ready for world domination ;-)
+

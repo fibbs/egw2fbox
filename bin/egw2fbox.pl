@@ -94,10 +94,15 @@ MA 02110-1301, USA.
 =cut
 # What is my current version number?
 # For compatibility reasons use 0.01.02 instead of 0.1.2 
-BEGIN { $VERSION = "0.08.00"; }
+BEGIN { $VERSION = "0.08.01"; }
 =pod
 
 =head1 HISTORY
+
+ 0.08.01 2011-05-05 Kai Ellinger <coding@blicke.de>
+       Documentation:
+       - Finished API docs
+       - Creating 'bin/create_docs.sh' and related files under 'docs' directory
 
  0.08.00 2011-04-05 Kai Ellinger <coding@blicke.de>
        Documentation:
@@ -980,6 +985,23 @@ EOF
 	close $FRITZXML;
 }
 
+
+##### START: function documentation ##### 
+=pod
+
+=head2 Function rcube_update_address_book (HASH REF egw_address_data)
+
+This function the Round Cube database with names and e-mail addresses of the 
+EGW address book by deleting the whole contacts table for the configured user 
+and inserting each contact again. If there is any error, the whole DB transaction
+is rolled back.
+
+IN: HASH REF the address list
+
+OUT: Nothing
+
+=cut
+##### END: function documentation #####
 sub rcube_update_address_book {
 	verbose ("rcube_update_address_book() updating round cube address book");
 	
@@ -1144,6 +1166,33 @@ sub rcube_update_address_book {
 }
 
 
+##### START: function documentation ##### 
+=pod
+
+=head2 Function rcube_insert_mail_address (HANDLE sql_statement_handle, STRING email, STRING name, STRING first_name, STRING family_name, NUMBER timestamp)
+
+Helper function called by function rcube_update_address_book.
+
+Executes an INSERT statement per each e-mail address.
+
+IN:
+
+- handle for SQL statement
+
+- email address
+
+- full name
+
+- first name
+
+- family name
+
+- changed time stamp from EGW database
+
+OUT: Nothing
+
+=cut
+##### END: function documentation #####
 sub rcube_insert_mail_address() {
 		my $sth       = shift;
 		my $email     = shift;
@@ -1181,6 +1230,19 @@ sub rcube_insert_mail_address() {
 }
 
 
+##### START: function documentation ##### 
+=pod
+
+=head2 Function mutt_update_address_book (HASH REF egw_address_data)
+
+This function creates a TXT file to be used as MUTT address book.
+
+IN: HASH REF the address list
+
+OUT: Nothing
+
+=cut
+##### END: function documentation #####
 sub mutt_update_address_book {
 	verbose ("mutt_update_address_book() updating mutt address book");
 	
@@ -1224,6 +1286,17 @@ sub mutt_update_address_book {
 
 
 
+##### START: function documentation ##### 
+=pod
+
+=head2 MAIN
+
+Function check_args () and parse_config () are called to load the configuration before reading 
+the EGW database and creating address books for FritzBox, Round Cube and MUTT function creates 
+a TXT file to be used as MUTT address book.
+
+=cut
+##### END: function documentation #####
 #### MAIN
 check_args;
 parse_config;
@@ -1347,7 +1420,8 @@ __END__
 
 =head1 INSTALLATION
 
-Steps to install coming here.
+- Download the head revision via http://git.fibbs.org/?p=egw2fbox.git;a=snapshot;h=HEAD;sf=tgz
+
 
 TBD
 
