@@ -22,6 +22,16 @@
 	<li><a href="#options">OPTIONS</a></li>
 	<li><a href="#copyright_and_license">COPYRIGHT AND LICENSE</a></li>
 	<li><a href="#history">HISTORY</a></li>
+	<li><a href="#installation">INSTALLATION</a></li>
+	<li><a href="#config_file">CONFIG FILE</a></li>
+	<ul>
+
+		<li><a href="#egoupware_section">eGoupware section</a></li>
+		<li><a href="#fritzbox_section">FritzBox section</a></li>
+		<li><a href="#round_cube_section">Round Cube section</a></li>
+		<li><a href="#mutt_section">MUTT section</a></li>
+	</ul>
+
 	<li><a href="#api">API</a></li>
 	<ul>
 
@@ -40,16 +50,6 @@
 		<li><a href="#function_rcube_insert_mail_address__handle_sql_statement_handle__string_email__string_name__string_first_name__string_family_name__number_timestamp_">Function rcube_insert_mail_address (HANDLE sql_statement_handle, STRING email, STRING name, STRING first_name, STRING family_name, NUMBER timestamp)</a></li>
 		<li><a href="#function_mutt_update_address_book__hash_ref_egw_address_data_">Function mutt_update_address_book (HASH REF egw_address_data)</a></li>
 		<li><a href="#main">MAIN</a></li>
-	</ul>
-
-	<li><a href="#installation">INSTALLATION</a></li>
-	<li><a href="#config_file">CONFIG FILE</a></li>
-	<ul>
-
-		<li><a href="#egoupware_section">eGoupware section</a></li>
-		<li><a href="#fritzbox_section">FritzBox section</a></li>
-		<li><a href="#round_cube_section">Round Cube section</a></li>
-		<li><a href="#mutt_section">MUTT section</a></li>
 	</ul>
 
 	<li><a href="#tutorials">TUTORIALS</a></li>
@@ -76,7 +76,7 @@
 </p>
 <hr />
 <h1><a name="description">DESCRIPTION</a></h1>
-<p><strong>This program</strong> reads phone numbers and e-mail addresses from the eGroupware database table 'contacts' and exports them to other clients.</p>
+<p><strong>This program</strong> reads phone numbers and e-mail addresses from the eGroupware database table <strong>contacts</strong> and exports them to other clients.</p>
 <p>Currently supported clients are:</p>
 <dl>
 <dt><strong><a name="phone_numbers" class="item">phone numbers:</a></strong>
@@ -100,7 +100,7 @@
 </p>
 <hr />
 <h1><a name="synopsis">SYNOPSIS</a></h1>
-<p>egw2fbox.pl [--verbose] [-v] [--config filename.ini] [-c filename.ini] [--version] [--help] [-h] [-?] [--man] [--changelog]</p>
+<p><code>egw2fbox.pl [--verbose] [-v] [--config filename.ini] [-c filename.ini] [--version] [--help] [-h] [-?] [--man] [--changelog]</code></p>
 <p>
 </p>
 <hr />
@@ -174,7 +174,9 @@ MA 02110-1301, USA.</p>
 <pre>
  0.08.01 2011-05-05 Kai Ellinger &lt;coding@blicke.de&gt;
        Documentation:
-       - Finished API docs</pre>
+       - Finished API docs
+       - Creating 'bin/create_docs.sh' and related files under 'docs' directory
+       - Creating minor versions of INSTALL and CONFIG FILE sections</pre>
 <pre>
  0.08.00 2011-04-05 Kai Ellinger &lt;coding@blicke.de&gt;
        Documentation:
@@ -298,6 +300,43 @@ MA 02110-1301, USA.</p>
 <pre>
  0.01.00 2011-02-24 Kai Ellinger &lt;coding@blicke.de&gt;, Christian Anton &lt;mail@christiananton.de&gt;
           Initial version of this script, ready for world domination ;-)</pre>
+<p>
+</p>
+<hr />
+<h1><a name="installation">INSTALLATION</a></h1>
+<p>- A current version of <strong>PERL</strong> is needed. <em class="file">egw2fbox.pl</em> requires module DBI and DBD::Mysql. 
+<em class="file">fritzuploader.pl</em> requires module XML::Simple. All other modules needed to run the script 
+are part of the standard perl library and don't need to be installed.</p>
+<p>- Download the head revision via <a href="http://git.fibbs.org/?p=egw2fbox.git;a=snapshot;h=HEAD;sf=tgz">http://git.fibbs.org/</a></p>
+<p>- Copy file <em class="file">etc/egw2fbox.conf.default</em> to <em class="file">etc/egw2fbox.conf</em> and update values according to your needs</p>
+<p>- Test in verbose mode: <code>/path/to/egw2fbox/bin/cronjob.sh -v -c /path/to/egw2fbox/etc/egw2fbox.conf</code></p>
+<p>- Add to your crontab:</p>
+<p><code>*/20 * * * * /path/to/egw2fbox/bin/cronjob.sh -c /path/to/egw2fbox/etc/egw2fbox.conf</code></p>
+<p>
+</p>
+<hr />
+<h1><a name="config_file">CONFIG FILE</a></h1>
+<p>This section may later describes the structure of the INI file used by this script. 
+Until now, see the comments in <em class="file">egw2fbox.conf.default</em>.</p>
+<p>* File <em class="file">egw2fbox.pl</em> uses command line option <code>-config /path/to/fileName.ini</code>, default is <em class="file">egw2fbox.conf</em>.</p>
+<p>* File <em class="file">cronjob.sh</em> uses command line option <code>-c /path/to/fileName.ini</code>, no default value.</p>
+<p>* File <em class="file">fritzuploader.pl</em> searches for the value of environment variable FRITZUPLOADERCFG, default is <em class="file">fritzuploader.conf</em>.</p>
+<p>
+</p>
+<h2><a name="egoupware_section">eGoupware section</a></h2>
+<p>Configuration settings related to the eGroupware database</p>
+<p>
+</p>
+<h2><a name="fritzbox_section">FritzBox section</a></h2>
+<p>Configuration settings related to the Fritz Box</p>
+<p>
+</p>
+<h2><a name="round_cube_section">Round Cube section</a></h2>
+<p>Configuration settings related to the Round Cube database</p>
+<p>
+</p>
+<h2><a name="mutt_section">MUTT section</a></h2>
+<p>Configuration settings related to MUTT</p>
 <p>
 </p>
 <hr />
@@ -429,35 +468,6 @@ is rolled back.</p>
 <p>Function check_args () and parse_config () are called to load the configuration before reading 
 the EGW database and creating address books for FritzBox, Round Cube and MUTT function creates 
 a TXT file to be used as MUTT address book.</p>
-<p>
-</p>
-<hr />
-<h1><a name="installation">INSTALLATION</a></h1>
-<p>- Download the head revision via <a href="http://git.fibbs.org/?p=egw2fbox.git;a=snapshot;h=HEAD;sf=tgz">http://git.fibbs.org/?p=egw2fbox.git;a=snapshot;h=HEAD;sf=tgz</a></p>
-<p>TBD</p>
-<p>
-</p>
-<hr />
-<h1><a name="config_file">CONFIG FILE</a></h1>
-<p>This section describes the structure of the INI file used by this script.</p>
-<p>The default value is 'egw2fbox.conf'.</p>
-<p>The file name can be set via command line option '-config /path/to/fileName.ini'.</p>
-<p>
-</p>
-<h2><a name="egoupware_section">eGoupware section</a></h2>
-<p>TBD</p>
-<p>
-</p>
-<h2><a name="fritzbox_section">FritzBox section</a></h2>
-<p>TBD</p>
-<p>
-</p>
-<h2><a name="round_cube_section">Round Cube section</a></h2>
-<p>TBD</p>
-<p>
-</p>
-<h2><a name="mutt_section">MUTT section</a></h2>
-<p>TBD</p>
 <p>
 </p>
 <hr />

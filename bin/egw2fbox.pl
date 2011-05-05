@@ -8,7 +8,7 @@ egw2fbox.pl
 
 =head1 DESCRIPTION
 
-B<This program> reads phone numbers and e-mail addresses from the eGroupware database table 'contacts' and exports them to other clients.
+B<This program> reads phone numbers and e-mail addresses from the eGroupware database table B<contacts> and exports them to other clients.
 
 Currently supported clients are:
 
@@ -30,7 +30,7 @@ For uploading the created XML address book to a Fritz Box a small perl script ca
 
 =head1 SYNOPSIS
 
-egw2fbox.pl [--verbose] [-v] [--config filename.ini] [-c filename.ini] [--version] [--help] [-h] [-?] [--man] [--changelog]
+C<<< egw2fbox.pl [--verbose] [-v] [--config filename.ini] [-c filename.ini] [--version] [--help] [-h] [-?] [--man] [--changelog] >>>
 
 =head1 OPTIONS
 
@@ -103,6 +103,7 @@ BEGIN { $VERSION = "0.08.01"; }
        Documentation:
        - Finished API docs
        - Creating 'bin/create_docs.sh' and related files under 'docs' directory
+       - Creating minor versions of INSTALL and CONFIG FILE sections
 
  0.08.00 2011-04-05 Kai Ellinger <coding@blicke.de>
        Documentation:
@@ -226,6 +227,49 @@ BEGIN { $VERSION = "0.08.01"; }
 
  0.01.00 2011-02-24 Kai Ellinger <coding@blicke.de>, Christian Anton <mail@christiananton.de>
           Initial version of this script, ready for world domination ;-)
+
+=head1 INSTALLATION
+
+- A current version of B<PERL> is needed. F<egw2fbox.pl> requires module DBI and DBD::Mysql. 
+F<fritzuploader.pl> requires module XML::Simple. All other modules needed to run the script 
+are part of the standard perl library and don't need to be installed.
+
+- Download the head revision via L<http://git.fibbs.org/?p=egw2fbox.git;a=snapshot;h=HEAD;sf=tgz>
+
+- Copy file F<etc/egw2fbox.conf.default> to F<etc/egw2fbox.conf> and update values according to your needs
+
+- Test in verbose mode: C<<< /path/to/egw2fbox/bin/cronjob.sh -v -c /path/to/egw2fbox/etc/egw2fbox.conf >>>
+
+- Add to your crontab:
+
+C<<< */20 * * * * /path/to/egw2fbox/bin/cronjob.sh -c /path/to/egw2fbox/etc/egw2fbox.conf >>>
+
+=head1 CONFIG FILE
+
+This section may later describes the structure of the INI file used by this script. 
+Until now, see the comments in F<egw2fbox.conf.default>.
+
+* File F<egw2fbox.pl> uses command line option C<-config /path/to/fileName.ini>, default is F<egw2fbox.conf>.
+
+* File F<cronjob.sh> uses command line option C<-c /path/to/fileName.ini>, no default value.
+
+* File F<fritzuploader.pl> searches for the value of environment variable FRITZUPLOADERCFG, default is F<fritzuploader.conf>.
+
+=head2 eGoupware section
+
+Configuration settings related to the eGroupware database
+
+=head2 FritzBox section
+
+Configuration settings related to the Fritz Box
+
+=head2 Round Cube section
+
+Configuration settings related to the Round Cube database
+
+=head2 MUTT section
+
+Configuration settings related to MUTT
 
 =head1 API
 
@@ -1417,37 +1461,6 @@ if($lazyUpdateConfigured && $cachedEgwAddressBookData && $cachedEgwAddressBookDa
 __END__
 ##### START: Documentation TAIL in POD format #####
 =pod
-
-=head1 INSTALLATION
-
-- Download the head revision via http://git.fibbs.org/?p=egw2fbox.git;a=snapshot;h=HEAD;sf=tgz
-
-
-TBD
-
-=head1 CONFIG FILE
-
-This section describes the structure of the INI file used by this script. 
-
-The default value is 'egw2fbox.conf'. 
-
-The file name can be set via command line option '-config /path/to/fileName.ini'.
-
-=head2 eGoupware section
-
-TBD
-
-=head2 FritzBox section
-
-TBD
-
-=head2 Round Cube section
-
-TBD
-
-=head2 MUTT section
-
-TBD
 
 =head1 TUTORIALS
 

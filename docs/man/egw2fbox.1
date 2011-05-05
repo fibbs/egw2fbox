@@ -141,7 +141,7 @@
 egw2fbox.pl
 .SH "DESCRIPTION"
 .IX Header "DESCRIPTION"
-\&\fBThis program\fR reads phone numbers and e\-mail addresses from the eGroupware database table 'contacts' and exports them to other clients.
+\&\fBThis program\fR reads phone numbers and e\-mail addresses from the eGroupware database table \fBcontacts\fR and exports them to other clients.
 .PP
 Currently supported clients are:
 .IP "phone numbers:" 3
@@ -156,7 +156,7 @@ Currently supported clients are:
 For uploading the created \s-1XML\s0 address book to a Fritz Box a small perl script called FritzUploader from Jan-Piet Mens is used.
 .SH "SYNOPSIS"
 .IX Header "SYNOPSIS"
-egw2fbox.pl [\-\-verbose] [\-v] [\-\-config filename.ini] [\-c filename.ini] [\-\-version] [\-\-help] [\-h] [\-?] [\-\-man] [\-\-changelog]
+\&\f(CW\*(C`egw2fbox.pl [\-\-verbose] [\-v] [\-\-config filename.ini] [\-c filename.ini] [\-\-version] [\-\-help] [\-h] [\-?] [\-\-man] [\-\-changelog]\*(C'\fR
 .SH "OPTIONS"
 .IX Header "OPTIONS"
 Runtime:
@@ -202,10 +202,12 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
 \&\s-1MA\s0 02110\-1301, \s-1USA\s0.
 .SH "HISTORY"
 .IX Header "HISTORY"
-.Vb 3
+.Vb 5
 \& 0.08.01 2011\-05\-05 Kai Ellinger <coding@blicke.de>
 \&       Documentation:
 \&       \- Finished API docs
+\&       \- Creating \*(Aqbin/create_docs.sh\*(Aq and related files under \*(Aqdocs\*(Aq directory
+\&       \- Creating minor versions of INSTALL and CONFIG FILE sections
 \&
 \& 0.08.00 2011\-04\-05 Kai Ellinger <coding@blicke.de>
 \&       Documentation:
@@ -330,6 +332,43 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
 \& 0.01.00 2011\-02\-24 Kai Ellinger <coding@blicke.de>, Christian Anton <mail@christiananton.de>
 \&          Initial version of this script, ready for world domination ;\-)
 .Ve
+.SH "INSTALLATION"
+.IX Header "INSTALLATION"
+\&\- A current version of \fB\s-1PERL\s0\fR is needed. \fIegw2fbox.pl\fR requires module \s-1DBI\s0 and DBD::Mysql. 
+\&\fIfritzuploader.pl\fR requires module XML::Simple. All other modules needed to run the script 
+are part of the standard perl library and don't need to be installed.
+.PP
+\&\- Download the head revision via <http://git.fibbs.org/?p=egw2fbox.git;a=snapshot;h=HEAD;sf=tgz>
+.PP
+\&\- Copy file \fIetc/egw2fbox.conf.default\fR to \fIetc/egw2fbox.conf\fR and update values according to your needs
+.PP
+\&\- Test in verbose mode: \f(CW\*(C`/path/to/egw2fbox/bin/cronjob.sh \-v \-c /path/to/egw2fbox/etc/egw2fbox.conf\*(C'\fR
+.PP
+\&\- Add to your crontab:
+.PP
+\&\f(CW\*(C`*/20 * * * * /path/to/egw2fbox/bin/cronjob.sh \-c /path/to/egw2fbox/etc/egw2fbox.conf\*(C'\fR
+.SH "CONFIG FILE"
+.IX Header "CONFIG FILE"
+This section may later describes the structure of the \s-1INI\s0 file used by this script. 
+Until now, see the comments in \fIegw2fbox.conf.default\fR.
+.PP
+* File \fIegw2fbox.pl\fR uses command line option \f(CW\*(C`\-config /path/to/fileName.ini\*(C'\fR, default is \fIegw2fbox.conf\fR.
+.PP
+* File \fIcronjob.sh\fR uses command line option \f(CW\*(C`\-c /path/to/fileName.ini\*(C'\fR, no default value.
+.PP
+* File \fIfritzuploader.pl\fR searches for the value of environment variable \s-1FRITZUPLOADERCFG\s0, default is \fIfritzuploader.conf\fR.
+.Sh "eGoupware section"
+.IX Subsection "eGoupware section"
+Configuration settings related to the eGroupware database
+.Sh "FritzBox section"
+.IX Subsection "FritzBox section"
+Configuration settings related to the Fritz Box
+.Sh "Round Cube section"
+.IX Subsection "Round Cube section"
+Configuration settings related to the Round Cube database
+.Sh "\s-1MUTT\s0 section"
+.IX Subsection "MUTT section"
+Configuration settings related to \s-1MUTT\s0
 .SH "API"
 .IX Header "API"
 .Sh "Required Perl modules"
@@ -491,30 +530,6 @@ This function creates a \s-1TXT\s0 file to be used as \s-1MUTT\s0 address book.
 Function check_args () and parse_config () are called to load the configuration before reading 
 the \s-1EGW\s0 database and creating address books for FritzBox, Round Cube and \s-1MUTT\s0 function creates 
 a \s-1TXT\s0 file to be used as \s-1MUTT\s0 address book.
-.SH "INSTALLATION"
-.IX Header "INSTALLATION"
-\&\- Download the head revision via http://git.fibbs.org/?p=egw2fbox.git;a=snapshot;h=HEAD;sf=tgz
-.PP
-\&\s-1TBD\s0
-.SH "CONFIG FILE"
-.IX Header "CONFIG FILE"
-This section describes the structure of the \s-1INI\s0 file used by this script.
-.PP
-The default value is 'egw2fbox.conf'.
-.PP
-The file name can be set via command line option '\-config /path/to/fileName.ini'.
-.Sh "eGoupware section"
-.IX Subsection "eGoupware section"
-\&\s-1TBD\s0
-.Sh "FritzBox section"
-.IX Subsection "FritzBox section"
-\&\s-1TBD\s0
-.Sh "Round Cube section"
-.IX Subsection "Round Cube section"
-\&\s-1TBD\s0
-.Sh "\s-1MUTT\s0 section"
-.IX Subsection "MUTT section"
-\&\s-1TBD\s0
 .SH "TUTORIALS"
 .IX Header "TUTORIALS"
 A set of small tutorials for writing the supported client address books with data from Egroupware.

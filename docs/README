@@ -3,7 +3,7 @@ NAME
 
 DESCRIPTION
     This program reads phone numbers and e-mail addresses from the
-    eGroupware database table 'contacts' and exports them to other clients.
+    eGroupware database table contacts and exports them to other clients.
 
     Currently supported clients are:
 
@@ -19,8 +19,8 @@ DESCRIPTION
     script called FritzUploader from Jan-Piet Mens is used.
 
 SYNOPSIS
-    egw2fbox.pl [--verbose] [-v] [--config filename.ini] [-c filename.ini]
-    [--version] [--help] [-h] [-?] [--man] [--changelog]
+    `egw2fbox.pl [--verbose] [-v] [--config filename.ini] [-c filename.ini]
+    [--version] [--help] [-h] [-?] [--man] [--changelog]'
 
 OPTIONS
     Runtime:
@@ -65,6 +65,8 @@ HISTORY
      0.08.01 2011-05-05 Kai Ellinger <coding@blicke.de>
            Documentation:
            - Finished API docs
+           - Creating 'bin/create_docs.sh' and related files under 'docs' directory
+           - Creating minor versions of INSTALL and CONFIG FILE sections
 
      0.08.00 2011-04-05 Kai Ellinger <coding@blicke.de>
            Documentation:
@@ -188,6 +190,55 @@ HISTORY
 
      0.01.00 2011-02-24 Kai Ellinger <coding@blicke.de>, Christian Anton <mail@christiananton.de>
               Initial version of this script, ready for world domination ;-)
+
+INSTALLATION
+    - A current version of PERL is needed. egw2fbox.pl requires module DBI
+    and DBD::Mysql. fritzuploader.pl requires module XML::Simple. All other
+    modules needed to run the script are part of the standard perl library
+    and don't need to be installed.
+
+    - Download the head revision via
+    http://git.fibbs.org/?p=egw2fbox.git;a=snapshot;h=HEAD;sf=tgz
+
+    - Copy file etc/egw2fbox.conf.default to etc/egw2fbox.conf and update
+    values according to your needs
+
+    - Test in verbose mode: `/path/to/egw2fbox/bin/cronjob.sh -v -c
+    /path/to/egw2fbox/etc/egw2fbox.conf'
+
+    - Add to your crontab:
+
+    `*/20 * * * * /path/to/egw2fbox/bin/cronjob.sh -c
+    /path/to/egw2fbox/etc/egw2fbox.conf'
+
+CONFIG FILE
+    This section may later describes the structure of the INI file used by
+    this script. Until now, see the comments in egw2fbox.conf.default.
+
+    * File egw2fbox.pl uses command line option `-config
+    /path/to/fileName.ini', default is egw2fbox.conf.
+
+    * File cronjob.sh uses command line option `-c /path/to/fileName.ini',
+    no default value.
+
+    * File fritzuploader.pl searches for the value of environment variable
+    FRITZUPLOADERCFG, default is fritzuploader.conf.
+
+  eGoupware section
+
+    Configuration settings related to the eGroupware database
+
+  FritzBox section
+
+    Configuration settings related to the Fritz Box
+
+  Round Cube section
+
+    Configuration settings related to the Round Cube database
+
+  MUTT section
+
+    Configuration settings related to MUTT
 
 API
   Required Perl modules
@@ -385,37 +436,6 @@ API
     configuration before reading the EGW database and creating address books
     for FritzBox, Round Cube and MUTT function creates a TXT file to be used
     as MUTT address book.
-
-INSTALLATION
-    - Download the head revision via
-    http://git.fibbs.org/?p=egw2fbox.git;a=snapshot;h=HEAD;sf=tgz
-
-    TBD
-
-CONFIG FILE
-    This section describes the structure of the INI file used by this
-    script.
-
-    The default value is 'egw2fbox.conf'.
-
-    The file name can be set via command line option '-config
-    /path/to/fileName.ini'.
-
-  eGoupware section
-
-    TBD
-
-  FritzBox section
-
-    TBD
-
-  Round Cube section
-
-    TBD
-
-  MUTT section
-
-    TBD
 
 TUTORIALS
     A set of small tutorials for writing the supported client address books

@@ -5,6 +5,8 @@ History:
                                       0.08.01 2011-05-05 Kai Ellinger <coding@blicke.de>
                                             Documentation:
                                             - Finished API docs
+                                            - Creating 'bin/create_docs.sh' and related files under 'docs' directory
+                                            - Creating minor versions of INSTALL and CONFIG FILE sections
 
                                       0.08.00 2011-04-05 Kai Ellinger <coding@blicke.de>
                                             Documentation:
