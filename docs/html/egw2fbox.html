@@ -76,22 +76,19 @@
 </p>
 <hr />
 <h1><a name="description">DESCRIPTION</a></h1>
-<p>This is a script running on a server and providing an automated way of sharing phone numbers and 
-e-mail addresses stored in the eGroupware database with clients not supporting any other server based 
+<p>The purpose of this script is to run on a server and provide an automated way of sharing eGroupware 
+hosted phone numbers and e-mail addresses with clients not supporting any other server based 
 synchronization.</p>
-<p>The phone numbers and e-mail addresses are read from the eGroupware database table <strong>contacts</strong> and 
+<p>The phone numbers and e-mail addresses are read from the eGroupware database table <em>contacts</em> and 
 exports in the native format of each clients.</p>
-<p>Because the supported clients have very limited address books, this is a one-way communication 
-and changes at client side are not reported back to eGroupware. Hence, the client based address books 
-should be used in readonly mode as much as possible and address changes should always be done inside 
-eGroupware.</p>
-<p>Further, eGroupware had build-in functionality called <strong>lazy update</strong> to reduce re-writing the address 
-books of the supported clients as much as possible. This reduces CPU time but - more important - also 
-reduces the need for uploading data to clients where continuously re-writing of address data would have 
-disadvantages. One example for disadvantages of updating addresses all 20 minutes is the FritzBox address 
-book that is written to flash memory where flash memory which has only a limited amount of supported 
-write cycles. But because <em class="file">egw2fbox.pl</em> avoids unnecessary write cycles as much as possible, it can 
-safely be used.</p>
+<p>Because the supported clients have very limited address book capabilities, this is a one-way communication 
+only. Hence, client side changes are not reported back to eGroupware and the client address books 
+should be configured to be readonly as much as possible.</p>
+<p>Further, eGroupware had build-in functionality called <em>lazy update</em> to reduce write cycles as much as 
+possible. This reduces CPU time but - more important - also reduces the need for uploading data to clients
+where continuous writing would have disadvantages. One example the FritzBox address 
+book that stores the addresses in flash memory. Flash memory has a limited amount of possible writes.
+But <em class="file">egw2fbox.pl</em> can be safely used because it avoids unnecessary write cycles as much as possible.</p>
 <p>Currently supported clients are:</p>
 <dl>
 <dt><strong><a name="phone_numbers" class="item">phone numbers:</a></strong>
