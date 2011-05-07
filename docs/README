@@ -2,8 +2,30 @@ NAME
     egw2fbox.pl
 
 DESCRIPTION
-    This program reads phone numbers and e-mail addresses from the
-    eGroupware database table contacts and exports them to other clients.
+    This is a script running on a server and providing an automated way of
+    sharing phone numbers and e-mail addresses stored in the eGroupware
+    database with clients not supporting any other server based
+    synchronization.
+
+    The phone numbers and e-mail addresses are read from the eGroupware
+    database table contacts and exports in the native format of each
+    clients.
+
+    Because the supported clients have very limited address books, this is a
+    one-way communication and changes at client side are not reported back
+    to eGroupware. Hence, the client based address books should be used in
+    readonly mode as much as possible and address changes should always be
+    done inside eGroupware.
+
+    Further, eGroupware had build-in functionality called lazy update to
+    reduce re-writing the address books of the supported clients as much as
+    possible. This reduces CPU time but - more important - also reduces the
+    need for uploading data to clients where continuously re-writing of
+    address data would have disadvantages. One example for disadvantages of
+    updating addresses all 20 minutes is the FritzBox address book that is
+    written to flash memory where flash memory which has only a limited
+    amount of supported write cycles. But because egw2fbox.pl avoids
+    unnecessary write cycles as much as possible, it can safely be used.
 
     Currently supported clients are:
 

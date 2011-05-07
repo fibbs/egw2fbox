@@ -132,7 +132,7 @@
 .\" ========================================================================
 .\"
 .IX Title "EGW2FBOX 1"
-.TH EGW2FBOX 1 "2011-05-06" "perl v5.10.0" "User Contributed Perl Documentation"
+.TH EGW2FBOX 1 "2011-05-07" "perl v5.10.0" "User Contributed Perl Documentation"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -141,7 +141,25 @@
 egw2fbox.pl
 .SH "DESCRIPTION"
 .IX Header "DESCRIPTION"
-\&\fBThis program\fR reads phone numbers and e\-mail addresses from the eGroupware database table \fBcontacts\fR and exports them to other clients.
+This is a script running on a server and providing an automated way of sharing phone numbers and 
+e\-mail addresses stored in the eGroupware database with clients not supporting any other server based 
+synchronization.
+.PP
+The phone numbers and e\-mail addresses are read from the eGroupware database table \fBcontacts\fR and 
+exports in the native format of each clients.
+.PP
+Because the supported clients have very limited address books, this is a one-way communication 
+and changes at client side are not reported back to eGroupware. Hence, the client based address books 
+should be used in readonly mode as much as possible and address changes should always be done inside 
+eGroupware.
+.PP
+Further, eGroupware had build-in functionality called \fBlazy update\fR to reduce re-writing the address 
+books of the supported clients as much as possible. This reduces \s-1CPU\s0 time but \- more important \- also 
+reduces the need for uploading data to clients where continuously re-writing of address data would have 
+disadvantages. One example for disadvantages of updating addresses all 20 minutes is the FritzBox address 
+book that is written to flash memory where flash memory which has only a limited amount of supported 
+write cycles. But because \fIegw2fbox.pl\fR avoids unnecessary write cycles as much as possible, it can 
+safely be used.
 .PP
 Currently supported clients are:
 .IP "phone numbers:" 3
