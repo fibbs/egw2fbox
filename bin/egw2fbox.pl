@@ -1479,7 +1479,13 @@ __END__
 
 =head1 TUTORIALS
 
-A set of small tutorials for writing the supported client address books with data from Egroupware.
+This is a set of small tutorials for synchronizing the supported clients with eGroupware.
+
+
+
+=head2 Connecting to the database.
+
+TBD
 
 =head2 Setting up the FritzBox address book
 
