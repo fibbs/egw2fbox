@@ -109,10 +109,14 @@ MA 02110-1301, USA.
 =cut
 # What is my current version number?
 # For compatibility reasons use 0.01.02 instead of 0.1.2 
-BEGIN { $VERSION = "0.08.01"; }
+BEGIN { $VERSION = "0.08.02"; }
 =pod
 
 =head1 HISTORY
+
+ 0.08.02 2013-10-03 Kai Ellinger <coding@blicke.de>
+      Fixed bin/fritzuploader.pl in order to work with new Fritzbox firmware versions 
+       See: https://github.com/jpmens/fritzuploader/issues/1
 
  0.08.01 2011-05-05 Kai Ellinger <coding@blicke.de>
        Documentation:

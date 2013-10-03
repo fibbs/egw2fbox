@@ -82,6 +82,10 @@ COPYRIGHT AND LICENSE
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 HISTORY
+     0.08.02 2013-10-03 Kai Ellinger <coding@blicke.de>
+          Fixed bin/fritzuploader.pl in order to work with new Fritzbox firmware versions 
+           See: https://github.com/jpmens/fritzuploader/issues/1
+
      0.08.01 2011-05-05 Kai Ellinger <coding@blicke.de>
            Documentation:
            - Finished API docs
