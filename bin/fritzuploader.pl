@@ -69,27 +69,27 @@ my $phonebookFile = $cfg->{FRITZUPLOADER_XML_FILE};
 #my $password = $ARGV[0] or die "Usage: $0 fritzbox-password\n";
 # END modification
 
-my $webcmurl = "http://$fritz/cgi-bin/webcm";
+my $webcmurl = "http://$fritz";
 my $firmwurl = "http://$fritz/cgi-bin/firmwarecfg";
 
 my $successmsg = 'Das Telefonbuch der FRITZ!Box wurde wiederhergestellt'; # German
 
 my $ua = LWP::UserAgent->new;
-my $resp = $ua->get( "$webcmurl?getpage=../html/login_sid.xml");
+my $resp = $ua->get( "$webcmurl/login_sid.lua");
 die "Can't access $webcmurl: " . $resp->status_line() . "\n" unless $resp->is_success();
 
 my $content = $resp->content();
-
+#print "2223---$content\n";
 #  <SessionInfo>
 #  <iswriteaccess>0</iswriteaccess>
 #  <SID>0000000000000000</SID>
 #  <Challenge>fb6138de</Challenge>
 #  </SessionInfo>
-
+#### debug: can't parse login page
+print "4-$content\n";
 my $challenge = XMLin($content)->{Challenge};
-
+#print "4+\n";
 # FIXME: clear-text password's character points > 255 must be '.'
-
 my $input = $challenge . '-' . $password;
 Encode::from_to($input, 'ascii', 'utf16le');
 
@@ -97,9 +97,9 @@ my $challengeresponse = $challenge . '-' . lc(md5_hex($input));
 
 # print $challengeresponse, "\n";
 
-$resp = HTTP::Request->new(POST => $webcmurl);
+$resp = HTTP::Request->new(POST => "$webcmurl/login_sid.lua");
 $resp->content_type("application/x-www-form-urlencoded");
-$resp->content("login:command/response=${challengeresponse}&getpage=../html/login_sid.xml");
+$resp->content("response=${challengeresponse}&page=/login_sid.lua");
 
 my $loginresp = $ua->request($resp);
 die "Can't get SID " . $loginresp->status_line() . "\n" unless $loginresp->is_success();

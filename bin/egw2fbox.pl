@@ -1509,7 +1509,7 @@ Kai Ellinger <coding@blicke.de>
 
 - Fritz Box router product family from AVM L<http://www.avm.de/en/Produkte/FRITZBox/index.html>
 
-- FritzUploader to upload XML address books to a Fritz Box from Jan-Piet Mens L<http://blog.fupps.com/2010/06/25/upload-phonebook-to-a-fritzbox-from-the-command-line> 
+- FritzUploader to upload XML address books to a Fritz Box from Jan-Piet Mens L<https://github.com/jpmens/fritzuploader> 
 
 - Round Cube Web based mail client L<http://roundcube.net>
 
@@ -1517,3 +1517,4 @@ Kai Ellinger <coding@blicke.de>
 
 =cut
 ##### END: Documentation TAIL in POD format #####
+

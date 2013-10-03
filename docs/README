@@ -458,8 +458,12 @@ API
     as MUTT address book.
 
 TUTORIALS
-    A set of small tutorials for writing the supported client address books
-    with data from Egroupware.
+    This is a set of small tutorials for synchronizing the supported clients
+    with eGroupware.
+
+  Connecting to the database.
+
+    TBD
 
   Setting up the FritzBox address book
 
@@ -483,9 +487,7 @@ SEE ALSO
     http://www.avm.de/en/Produkte/FRITZBox/index.html
 
     - FritzUploader to upload XML address books to a Fritz Box from Jan-Piet
-    Mens
-    http://blog.fupps.com/2010/06/25/upload-phonebook-to-a-fritzbox-from-the
-    -command-line
+    Mens https://github.com/jpmens/fritzuploader
 
     - Round Cube Web based mail client http://roundcube.net
 
