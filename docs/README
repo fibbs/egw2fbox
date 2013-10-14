@@ -249,24 +249,19 @@ CONFIG FILE
     FRITZUPLOADERCFG, default is fritzuploader.conf.
 
   eGoupware section
-
     Configuration settings related to the eGroupware database
 
   FritzBox section
-
     Configuration settings related to the Fritz Box
 
   Round Cube section
-
     Configuration settings related to the Round Cube database
 
   MUTT section
-
     Configuration settings related to MUTT
 
 API
   Required Perl modules
-
     Most Perl modules used by this program are part of the standard perl
     library perlmodlib http://perldoc.perl.org/perlmodlib.html and are
     installed by default.
@@ -275,7 +270,6 @@ API
     the MySQL database and are named DBI and DBD::Mysql.
 
   Function check_args ()
-
     This function is checking command line options and printing help
     messages if requested.
 
@@ -284,7 +278,6 @@ API
     OUT: Returns nothing
 
   Function parse_config ()
-
     This function is parsing the config file given by command line option
     '-c filename.ini'.
 
@@ -293,7 +286,6 @@ API
     OUT: Returns nothing
 
   Function verbose (STRING message)
-
     Printing out verbose messages if verbose mode is enabled.
 
     IN: Takes the message to print out
@@ -301,7 +293,6 @@ API
     OUT: Returns nothing
 
   Function sort_user_id_list (STRING user_id_list)
-
     This function is called by function find_EGW_user (STRING user_id_list)
     to sort the user list it looked up before.
 
@@ -318,7 +309,6 @@ API
     OUT: Returns a sorted user id list string
 
   Function find_EGW_user (STRING config_parameter)
-
     This function returns a sorted user id list string that is either
     defined by the global configuration parameter EGW_ADDRBOOK_OWNERS or one
     of the parameters FBOX_EGW_ADDRBOOK_OWNERS, RCUBE_EGW_ADDRBOOK_OWNERS
@@ -330,7 +320,6 @@ API
     OUT: Returns a sorted user id list string
 
   Function egw_read_db (STRING user_id_list)
-
     Connects to eGroupware database and looks up address book values for the
     given user id list including time stamp of last change.
 
@@ -343,7 +332,6 @@ API
     - the time stamp when this list was modified the last time
 
   Function fbox_reformatTelNr (STRING phone_number)
-
     This is a helper function called by function fbox_write_xml_contact
     format the phone number in a way that the Fritz Box can resolve it. How
     the phone number is formatted exactly is defined in the fritz box
@@ -368,7 +356,6 @@ API
     incoming calls correctly
 
   Function fbox_write_xml_contact (HANDLE xml_file, STRING contact_name, STRING contact_name_suffix, ARRAY REF phone_numbers, NUMBER timestamp)
-
     This is a function called by function fbox_gen_fritz_xml for each single
     contact that needs to be written to the XML file. The contact name is
     formatted to fit into the restrictions of the Fritz Box and the phones
@@ -389,7 +376,6 @@ API
     OUT: Nothing
 
   Function fbox_count_contacts_numbers (HASH REF egw_address_data, STRING key_to_search)
-
     This is a function called by function fbox_gen_fritz_xml for each single
     contact found in the eGroupware address book to know how many phone
     numbers this contact has. If there are no phone numbers, this contact
@@ -406,7 +392,6 @@ API
     OUT: NUMBER count of found phone numbers
 
   Function fbox_gen_fritz_xml (HASH REF egw_address_data)
-
     This function creates the XML file to upload to the Fritz Box.
 
     IN: HASH REF the address list
@@ -414,7 +399,6 @@ API
     OUT: Nothing
 
   Function rcube_update_address_book (HASH REF egw_address_data)
-
     This function the Round Cube database with names and e-mail addresses of
     the EGW address book by deleting the whole contacts table for the
     configured user and inserting each contact again. If there is any error,
@@ -425,7 +409,6 @@ API
     OUT: Nothing
 
   Function rcube_insert_mail_address (HANDLE sql_statement_handle, STRING email, STRING name, STRING first_name, STRING family_name, NUMBER timestamp)
-
     Helper function called by function rcube_update_address_book.
 
     Executes an INSERT statement per each e-mail address.
@@ -447,7 +430,6 @@ API
     OUT: Nothing
 
   Function mutt_update_address_book (HASH REF egw_address_data)
-
     This function creates a TXT file to be used as MUTT address book.
 
     IN: HASH REF the address list
@@ -455,7 +437,6 @@ API
     OUT: Nothing
 
   MAIN
-
     Function check_args () and parse_config () are called to load the
     configuration before reading the EGW database and creating address books
     for FritzBox, Round Cube and MUTT function creates a TXT file to be used
@@ -466,19 +447,15 @@ TUTORIALS
     with eGroupware.
 
   Connecting to the database.
-
     TBD
 
   Setting up the FritzBox address book
-
     TBD
 
   Setting up the Round Cube address book
-
     TBD
 
   Setting up the MUTT address book
-
     TBD
 
 AUTHORS
