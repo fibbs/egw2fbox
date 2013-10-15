@@ -86,16 +86,12 @@ my $content = $resp->content();
 #  <Challenge>fb6138de</Challenge>
 #  </SessionInfo>
 #### debug: can't parse login page
-print "4-$content\n";
 my $challenge = XMLin($content)->{Challenge};
-#print "4+\n";
 # FIXME: clear-text password's character points > 255 must be '.'
 my $input = $challenge . '-' . $password;
 Encode::from_to($input, 'ascii', 'utf16le');
 
 my $challengeresponse = $challenge . '-' . lc(md5_hex($input));
-
-# print $challengeresponse, "\n";
 
 $resp = HTTP::Request->new(POST => "$webcmurl/login_sid.lua");
 $resp->content_type("application/x-www-form-urlencoded");
