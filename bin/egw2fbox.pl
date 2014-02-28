@@ -116,7 +116,7 @@ BEGIN { $VERSION = "0.08.03"; }
 
 =head1 HISTORY
 
- 0.08.03 2014-02-18 Christian Anton <mail@christiananton.de>, Kai Ellinger <coding@blicke.de>
+ 0.08.03 2014-02-28 Christian Anton <mail@christiananton.de>, Kai Ellinger <coding@blicke.de>
       Moving code to github, adding README.md
 
  0.08.02 2013-10-03 Kai Ellinger <coding@blicke.de>
