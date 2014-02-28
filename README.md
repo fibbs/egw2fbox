@@ -15,7 +15,7 @@ Because the supported clients have very limited address book capabilities, this 
 only. Hence, client side changes are not reported back to eGroupware and the client address books 
 should be configured to be readonly as much as possible.
 
-Further, eGroupware had build-in functionality called _lazy update_ to reduce write cycles as much as 
+Further, `egw2fbox.pl` had build-in functionality called _lazy update_ to reduce write cycles as much as 
 possible. This reduces CPU time but - more important - also reduces the need for uploading data to clients
 where continuous writing would have disadvantages. One example the FritzBox address 
 book that stores the addresses in flash memory. Flash memory has a limited amount of possible writes.
@@ -73,7 +73,7 @@ Documentation:
 
 # COPYRIGHT AND LICENSE
 
-Copyright 2011 by Christian Anton <mail@christiananton.de>, Kai Ellinger <coding@blicke.de>
+Copyright 2011-2014 by Christian Anton <mail@christiananton.de>, Kai Ellinger <coding@blicke.de>
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -96,7 +96,7 @@ MA 02110-1301, USA.
 `fritzuploader.pl` requires module XML::Simple. All other modules needed to run the script 
 are part of the standard perl library and don't need to be installed.
 
-\- Download the head revision via [http://git.fibbs.org/?p=egw2fbox.git;a=snapshot;h=HEAD;sf=tgz](http://git.fibbs.org/?p=egw2fbox.git;a=snapshot;h=HEAD;sf=tgz)
+\- Clone the head revision from [https://github.com/fibbs/egw2fbox](https://github.com/fibbs/egw2fbox)
 
 \- Copy file `etc/egw2fbox.conf.default` to `etc/egw2fbox.conf` and update values according to your needs
 
@@ -148,3 +148,5 @@ Kai Ellinger <coding@blicke.de>
 \- Round Cube Web based mail client [http://roundcube.net](http://roundcube.net)
 
 \- MUTT command line mail client [http://www.mutt.org](http://www.mutt.org)
+
+\- The full `egw2fbox.pl` documentation is available under [docs/markdown/README.md](docs/markdown/README.md)

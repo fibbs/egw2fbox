@@ -16,7 +16,7 @@ DESCRIPTION
     changes are not reported back to eGroupware and the client address books
     should be configured to be readonly as much as possible.
 
-    Further, eGroupware had build-in functionality called *lazy update* to
+    Further, egw2fbox.pl had build-in functionality called *lazy update* to
     reduce write cycles as much as possible. This reduces CPU time but -
     more important - also reduces the need for uploading data to clients
     where continuous writing would have disadvantages. One example the
@@ -64,8 +64,8 @@ OPTIONS
     --changelog    Prints the change log.
 
 COPYRIGHT AND LICENSE
-    Copyright 2011 by Christian Anton <mail@christiananton.de>, Kai Ellinger
-    <coding@blicke.de>
+    Copyright 2011-2014 by Christian Anton <mail@christiananton.de>, Kai
+    Ellinger <coding@blicke.de>
 
     This program is free software; you can redistribute it and/or modify it
     under the terms of the GNU General Public License as published by the
@@ -82,6 +82,9 @@ COPYRIGHT AND LICENSE
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 HISTORY
+     0.08.03 2014-02-18 Christian Anton <mail@christiananton.de>, Kai Ellinger <coding@blicke.de>
+          Moving code to github, adding README.md
+
      0.08.02 2013-10-03 Kai Ellinger <coding@blicke.de>
           Fixed bin/fritzuploader.pl in order to work with new Fritzbox firmware versions 
            See: https://github.com/jpmens/fritzuploader/issues/1
@@ -221,8 +224,7 @@ INSTALLATION
     modules needed to run the script are part of the standard perl library
     and don't need to be installed.
 
-    - Download the head revision via
-    http://git.fibbs.org/?p=egw2fbox.git;a=snapshot;h=HEAD;sf=tgz
+    - Clone the head revision from https://github.com/fibbs/egw2fbox
 
     - Copy file etc/egw2fbox.conf.default to etc/egw2fbox.conf and update
     values according to your needs

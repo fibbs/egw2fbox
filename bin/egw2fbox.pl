@@ -19,7 +19,7 @@ Because the supported clients have very limited address book capabilities, this 
 only. Hence, client side changes are not reported back to eGroupware and the client address books 
 should be configured to be readonly as much as possible.
 
-Further, eGroupware had build-in functionality called I<lazy update> to reduce write cycles as much as 
+Further, F<egw2fbox.pl> had build-in functionality called I<lazy update> to reduce write cycles as much as 
 possible. This reduces CPU time but - more important - also reduces the need for uploading data to clients
 where continuous writing would have disadvantages. One example the FritzBox address 
 book that stores the addresses in flash memory. Flash memory has a limited amount of possible writes.
@@ -89,7 +89,7 @@ Prints the change log.
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright 2011 by Christian Anton <mail@christiananton.de>, Kai Ellinger <coding@blicke.de>
+Copyright 2011-2014 by Christian Anton <mail@christiananton.de>, Kai Ellinger <coding@blicke.de>
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -109,10 +109,13 @@ MA 02110-1301, USA.
 =cut
 # What is my current version number?
 # For compatibility reasons use 0.01.02 instead of 0.1.2 
-BEGIN { $VERSION = "0.08.02"; }
+BEGIN { $VERSION = "0.08.03"; }
 =pod
 
 =head1 HISTORY
+
+ 0.08.03 2014-02-18 Christian Anton <mail@christiananton.de>, Kai Ellinger <coding@blicke.de>
+      Moving code to github, adding README.md
 
  0.08.02 2013-10-03 Kai Ellinger <coding@blicke.de>
       Fixed bin/fritzuploader.pl in order to work with new Fritzbox firmware versions 
@@ -253,7 +256,7 @@ BEGIN { $VERSION = "0.08.02"; }
 F<fritzuploader.pl> requires module XML::Simple. All other modules needed to run the script 
 are part of the standard perl library and don't need to be installed.
 
-- Download the head revision via L<http://git.fibbs.org/?p=egw2fbox.git;a=snapshot;h=HEAD;sf=tgz>
+- Clone the head revision from L<https://github.com/fibbs/egw2fbox>
 
 - Copy file F<etc/egw2fbox.conf.default> to F<etc/egw2fbox.conf> and update values according to your needs
 

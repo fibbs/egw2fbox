@@ -85,7 +85,7 @@ exports in the native format of each clients.</p>
 <p>Because the supported clients have very limited address book capabilities, this is a one-way communication 
 only. Hence, client side changes are not reported back to eGroupware and the client address books 
 should be configured to be readonly as much as possible.</p>
-<p>Further, eGroupware had build-in functionality called <em>lazy update</em> to reduce write cycles as much as 
+<p>Further, <em class="file">egw2fbox.pl</em> had build-in functionality called <em>lazy update</em> to reduce write cycles as much as 
 possible. This reduces CPU time but - more important - also reduces the need for uploading data to clients
 where continuous writing would have disadvantages. One example the FritzBox address 
 book that stores the addresses in flash memory. Flash memory has a limited amount of possible writes.
@@ -167,7 +167,7 @@ But <em class="file">egw2fbox.pl</em> can be safely used because it avoids unnec
 </p>
 <hr />
 <h1><a name="copyright_and_license">COPYRIGHT AND LICENSE</a></h1>
-<p>Copyright 2011 by Christian Anton &lt;<a href="mailto:mail@christiananton.de">mail@christiananton.de</a>&gt;, Kai Ellinger &lt;<a href="mailto:coding@blicke.de">coding@blicke.de</a>&gt;</p>
+<p>Copyright 2011-2014 by Christian Anton &lt;<a href="mailto:mail@christiananton.de">mail@christiananton.de</a>&gt;, Kai Ellinger &lt;<a href="mailto:coding@blicke.de">coding@blicke.de</a>&gt;</p>
 <p>This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation; either version 2 of the License, or
@@ -184,6 +184,9 @@ MA 02110-1301, USA.</p>
 </p>
 <hr />
 <h1><a name="history">HISTORY</a></h1>
+<pre>
+ 0.08.03 2014-02-18 Christian Anton &lt;mail@christiananton.de&gt;, Kai Ellinger &lt;coding@blicke.de&gt;
+      Moving code to github, adding README.md</pre>
 <pre>
  0.08.02 2013-10-03 Kai Ellinger &lt;coding@blicke.de&gt;
       Fixed bin/fritzuploader.pl in order to work with new Fritzbox firmware versions 
@@ -324,7 +327,7 @@ MA 02110-1301, USA.</p>
 <p>- A current version of <strong>PERL</strong> is needed. <em class="file">egw2fbox.pl</em> requires module DBI and DBD::Mysql. 
 <em class="file">fritzuploader.pl</em> requires module XML::Simple. All other modules needed to run the script 
 are part of the standard perl library and don't need to be installed.</p>
-<p>- Download the head revision via <a href="http://git.fibbs.org/?p=egw2fbox.git;a=snapshot;h=HEAD;sf=tgz">http://git.fibbs.org/</a></p>
+<p>- Clone the head revision from <a href="https://github.com/fibbs/egw2fbox">https://github.com/fibbs/egw2fbox</a></p>
 <p>- Copy file <em class="file">etc/egw2fbox.conf.default</em> to <em class="file">etc/egw2fbox.conf</em> and update values according to your needs</p>
 <p>- Test in verbose mode: <code>/path/to/egw2fbox/bin/cronjob.sh -v -c /path/to/egw2fbox/etc/egw2fbox.conf</code></p>
 <p>- Add to your crontab:</p>
