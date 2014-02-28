@@ -19,11 +19,13 @@ Because the supported clients have very limited address book capabilities, this 
 only. Hence, client side changes are not reported back to eGroupware and the client address books 
 should be configured to be readonly as much as possible.
 
-Further, F<egw2fbox.pl> had build-in functionality called I<lazy update> to reduce write cycles as much as 
-possible. This reduces CPU time but - more important - also reduces the need for uploading data to clients
-where continuous writing would have disadvantages. One example the FritzBox address 
-book that stores the addresses in flash memory. Flash memory has a limited amount of possible writes.
-But F<egw2fbox.pl> can be safely used because it avoids unnecessary write cycles as much as possible.
+F<egw2fbox.pl> has functionality called I<lazy update> that can be configured per each client RoundCube,
+MUTT and FritzBox that only writes to the clients if data inside the eGroupware database was changed. 
+This reduces CPU time but - more important - also reduces the need for uploading data
+to clients where continuous writing would have disadvantages. 
+For example the FritzBox address book that stores the addresses in flash memory. Because flash memory has a 
+limited write cycles, it is better to update the address book only if there had been changes. F<egw2fbox.pl> 
+can be safely used together with F<cronjob.sh> because it avoids unnecessary write cycles as much as possible.
 
 Currently supported clients are:
 

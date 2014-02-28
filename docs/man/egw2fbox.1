@@ -153,11 +153,13 @@ Because the supported clients have very limited address book capabilities, this 
 only. Hence, client side changes are not reported back to eGroupware and the client address books 
 should be configured to be readonly as much as possible.
 .PP
-Further, \fIegw2fbox.pl\fR had build-in functionality called \fIlazy update\fR to reduce write cycles as much as 
-possible. This reduces \s-1CPU\s0 time but \- more important \- also reduces the need for uploading data to clients
-where continuous writing would have disadvantages. One example the FritzBox address 
-book that stores the addresses in flash memory. Flash memory has a limited amount of possible writes.
-But \fIegw2fbox.pl\fR can be safely used because it avoids unnecessary write cycles as much as possible.
+\&\fIegw2fbox.pl\fR has functionality called \fIlazy update\fR that can be configured per each client RoundCube,
+\&\s-1MUTT\s0 and FritzBox that only writes to the clients if data inside the eGroupware database was changed. 
+This reduces \s-1CPU\s0 time but \- more important \- also reduces the need for uploading data
+to clients where continuous writing would have disadvantages. 
+For example the FritzBox address book that stores the addresses in flash memory. Because flash memory has a 
+limited write cycles, it is better to update the address book only if there had been changes. \fIegw2fbox.pl\fR 
+can be safely used together with \fIcronjob.sh\fR because it avoids unnecessary write cycles as much as possible.
 .PP
 Currently supported clients are:
 .IP "phone numbers:" 3
