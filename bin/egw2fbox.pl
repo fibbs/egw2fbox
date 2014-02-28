@@ -1510,7 +1510,7 @@ TBD
 
 =head1 AUTHORS
 
-Christian Anton <mail@christiananton.de>
+Christian Anton (@fibbs)
 
 Kai Ellinger <coding@blicke.de>
 
