@@ -825,6 +825,8 @@ sub fbox_write_xml_contact {
 	my $name_length;
 	my $output_name;
 
+	if( !defined($contact_name) ) { $contact_name = ''; }
+
 	# convert output name to character encoding as defined in $FboxAsciiCodeTable
 	# only contact name and contact name's suffix can contain special chars
 	Encode::from_to($contact_name, "utf8", $FboxAsciiCodeTable);
@@ -947,6 +949,8 @@ EOF
 
 	foreach my $key ( keys(%{$egw_address_data}) ) {
 		my $contact_name = $egw_address_data->{$key}->{'n_fn'};
+		if( !defined( $contact_name ) ) { $contact_name = ''; }
+
 		verbose ("fbox_gen_fritz_xml() generating XML snippet for contact $contact_name");
 		if ($egw_address_data->{$key}->{'n_prefix'}) {
 			$contact_name =~ s/^$egw_address_data->{$key}->{'n_prefix'}\s*//;
@@ -1161,6 +1165,8 @@ sub rcube_update_address_book {
 		# Insert contact details for contacts having mail addresses specified
 		foreach my $key ( keys(%{$egw_address_data}) ) {
 			my $contact_name = $egw_address_data->{$key}->{'n_fn'};
+			if( !defined( $contact_name ) ) { $contact_name = ''; }
+
 			verbose ("rcube_update_address_book() generating rcube address book for contact $contact_name");
 
 			# if there is a prefix such as Mr, Mrs, Herr Frau, remove it
@@ -1527,3 +1533,4 @@ Kai Ellinger <coding@blicke.de>
 =cut
 ##### END: Documentation TAIL in POD format #####
 
+# vim: set tabstop=4 softtabstop=4 shiftwidth=4 noexpandtab number syntax=perl :
