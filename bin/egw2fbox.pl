@@ -111,10 +111,13 @@ MA 02110-1301, USA.
 =cut
 # What is my current version number?
 # For compatibility reasons use 0.01.02 instead of 0.1.2 
-BEGIN { $VERSION = "0.08.03"; }
+BEGIN { $VERSION = "0.08.04"; }
 =pod
 
 =head1 HISTORY
+	
+ 0.08.04 2017-08-06 Kai Ellinger <coding@blicke.de>
+      Added user name support to bin/fritzuploader.pl
 
  0.08.03 2014-02-28 Christian Anton <mail@christiananton.de>, Kai Ellinger <coding@blicke.de>
       Moving code to github, adding README.md
@@ -255,7 +258,7 @@ BEGIN { $VERSION = "0.08.03"; }
 =head1 INSTALLATION
 
 - A current version of B<PERL> is needed. F<egw2fbox.pl> requires module DBI and DBD::Mysql. 
-F<fritzuploader.pl> requires module XML::Simple. All other modules needed to run the script 
+F<fritzuploader.pl> requires module XML::Simple and URI::Encode. All other modules needed to run the script 
 are part of the standard perl library and don't need to be installed.
 
 - Clone the head revision from L<https://github.com/fibbs/egw2fbox>

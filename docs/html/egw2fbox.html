@@ -4,273 +4,251 @@
 <head>
 <title>egw2fbox documentation</title>
 <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-<link rev="made" href="mailto:_atsserver@pizzly.apple.com" />
+<link rev="made" href="mailto:root@localhost" />
 </head>
 
-<body style="background-color: white">
+<body>
 
 
-<!-- INDEX BEGIN -->
-<div name="index">
-<p><a name="__index__"></a></p>
 
-<ul>
-
-	<li><a href="#name">NAME</a></li>
-	<li><a href="#description">DESCRIPTION</a></li>
-	<li><a href="#synopsis">SYNOPSIS</a></li>
-	<li><a href="#options">OPTIONS</a></li>
-	<li><a href="#copyright_and_license">COPYRIGHT AND LICENSE</a></li>
-	<li><a href="#history">HISTORY</a></li>
-	<li><a href="#installation">INSTALLATION</a></li>
-	<li><a href="#config_file">CONFIG FILE</a></li>
-	<ul>
-
-		<li><a href="#egoupware_section">eGoupware section</a></li>
-		<li><a href="#fritzbox_section">FritzBox section</a></li>
-		<li><a href="#round_cube_section">Round Cube section</a></li>
-		<li><a href="#mutt_section">MUTT section</a></li>
-	</ul>
-
-	<li><a href="#api">API</a></li>
-	<ul>
-
-		<li><a href="#required_perl_modules">Required Perl modules</a></li>
-		<li><a href="#function_check_args___">Function check_args ()</a></li>
-		<li><a href="#function_parse_config___">Function parse_config ()</a></li>
-		<li><a href="#function_verbose__string_message_">Function verbose (STRING message)</a></li>
-		<li><a href="#function_sort_user_id_list__string_user_id_list_">Function sort_user_id_list (STRING user_id_list)</a></li>
-		<li><a href="#function_find_egw_user__string_config_parameter_">Function find_EGW_user (STRING config_parameter)</a></li>
-		<li><a href="#function_egw_read_db__string_user_id_list_">Function egw_read_db (STRING user_id_list)</a></li>
-		<li><a href="#function_fbox_reformattelnr__string_phone_number_">Function fbox_reformatTelNr (STRING phone_number)</a></li>
-		<li><a href="#function_fbox_write_xml_contact__handle_xml_file__string_contact_name__string_contact_name_suffix__array_ref_phone_numbers__number_timestamp_">Function fbox_write_xml_contact (HANDLE xml_file, STRING contact_name, STRING contact_name_suffix, ARRAY REF phone_numbers, NUMBER timestamp)</a></li>
-		<li><a href="#function_fbox_count_contacts_numbers__hash_ref_egw_address_data__string_key_to_search_">Function fbox_count_contacts_numbers (HASH REF egw_address_data, STRING key_to_search)</a></li>
-		<li><a href="#function_fbox_gen_fritz_xml__hash_ref_egw_address_data_">Function fbox_gen_fritz_xml (HASH REF egw_address_data)</a></li>
-		<li><a href="#function_rcube_update_address_book__hash_ref_egw_address_data_">Function rcube_update_address_book (HASH REF egw_address_data)</a></li>
-		<li><a href="#function_rcube_insert_mail_address__handle_sql_statement_handle__string_email__string_name__string_first_name__string_family_name__number_timestamp_">Function rcube_insert_mail_address (HANDLE sql_statement_handle, STRING email, STRING name, STRING first_name, STRING family_name, NUMBER timestamp)</a></li>
-		<li><a href="#function_mutt_update_address_book__hash_ref_egw_address_data_">Function mutt_update_address_book (HASH REF egw_address_data)</a></li>
-		<li><a href="#main">MAIN</a></li>
-	</ul>
-
-	<li><a href="#tutorials">TUTORIALS</a></li>
-	<ul>
-
-		<li><a href="#connecting_to_the_database_">Connecting to the database.</a></li>
-		<li><a href="#setting_up_the_fritzbox_address_book">Setting up the FritzBox address book</a></li>
-		<li><a href="#setting_up_the_round_cube_address_book">Setting up the Round Cube address book</a></li>
-		<li><a href="#setting_up_the_mutt_address_book">Setting up the MUTT address book</a></li>
-	</ul>
-
-	<li><a href="#authors">AUTHORS</a></li>
-	<li><a href="#see_also">SEE ALSO</a></li>
+<ul id="index">
+  <li><a href="#NAME">NAME</a></li>
+  <li><a href="#DESCRIPTION">DESCRIPTION</a></li>
+  <li><a href="#SYNOPSIS">SYNOPSIS</a></li>
+  <li><a href="#OPTIONS">OPTIONS</a></li>
+  <li><a href="#COPYRIGHT-AND-LICENSE">COPYRIGHT AND LICENSE</a></li>
+  <li><a href="#HISTORY">HISTORY</a></li>
+  <li><a href="#INSTALLATION">INSTALLATION</a></li>
+  <li><a href="#CONFIG-FILE">CONFIG FILE</a>
+    <ul>
+      <li><a href="#eGoupware-section">eGoupware section</a></li>
+      <li><a href="#FritzBox-section">FritzBox section</a></li>
+      <li><a href="#Round-Cube-section">Round Cube section</a></li>
+      <li><a href="#MUTT-section">MUTT section</a></li>
+    </ul>
+  </li>
+  <li><a href="#API">API</a>
+    <ul>
+      <li><a href="#Required-Perl-modules">Required Perl modules</a></li>
+      <li><a href="#Function-check_args">Function check_args ()</a></li>
+      <li><a href="#Function-parse_config">Function parse_config ()</a></li>
+      <li><a href="#Function-verbose-STRING-message">Function verbose (STRING message)</a></li>
+      <li><a href="#Function-sort_user_id_list-STRING-user_id_list">Function sort_user_id_list (STRING user_id_list)</a></li>
+      <li><a href="#Function-find_EGW_user-STRING-config_parameter">Function find_EGW_user (STRING config_parameter)</a></li>
+      <li><a href="#Function-egw_read_db-STRING-user_id_list">Function egw_read_db (STRING user_id_list)</a></li>
+      <li><a href="#Function-fbox_reformatTelNr-STRING-phone_number">Function fbox_reformatTelNr (STRING phone_number)</a></li>
+      <li><a href="#Function-fbox_write_xml_contact-HANDLE-xml_file-STRING-contact_name-STRING-contact_name_suffix-ARRAY-REF-phone_numbers-NUMBER-timestamp">Function fbox_write_xml_contact (HANDLE xml_file, STRING contact_name, STRING contact_name_suffix, ARRAY REF phone_numbers, NUMBER timestamp)</a></li>
+      <li><a href="#Function-fbox_count_contacts_numbers-HASH-REF-egw_address_data-STRING-key_to_search">Function fbox_count_contacts_numbers (HASH REF egw_address_data, STRING key_to_search)</a></li>
+      <li><a href="#Function-fbox_gen_fritz_xml-HASH-REF-egw_address_data">Function fbox_gen_fritz_xml (HASH REF egw_address_data)</a></li>
+      <li><a href="#Function-rcube_update_address_book-HASH-REF-egw_address_data">Function rcube_update_address_book (HASH REF egw_address_data)</a></li>
+      <li><a href="#Function-rcube_insert_mail_address-HANDLE-sql_statement_handle-STRING-email-STRING-name-STRING-first_name-STRING-family_name-NUMBER-timestamp">Function rcube_insert_mail_address (HANDLE sql_statement_handle, STRING email, STRING name, STRING first_name, STRING family_name, NUMBER timestamp)</a></li>
+      <li><a href="#Function-mutt_update_address_book-HASH-REF-egw_address_data">Function mutt_update_address_book (HASH REF egw_address_data)</a></li>
+      <li><a href="#MAIN">MAIN</a></li>
+    </ul>
+  </li>
+  <li><a href="#TUTORIALS">TUTORIALS</a>
+    <ul>
+      <li><a href="#Connecting-to-the-database">Connecting to the database.</a></li>
+      <li><a href="#Setting-up-the-FritzBox-address-book">Setting up the FritzBox address book</a></li>
+      <li><a href="#Setting-up-the-Round-Cube-address-book">Setting up the Round Cube address book</a></li>
+      <li><a href="#Setting-up-the-MUTT-address-book">Setting up the MUTT address book</a></li>
+    </ul>
+  </li>
+  <li><a href="#AUTHORS">AUTHORS</a></li>
+  <li><a href="#SEE-ALSO">SEE ALSO</a></li>
 </ul>
 
-<hr name="index" />
-</div>
-<!-- INDEX END -->
+<h1 id="NAME">NAME</h1>
 
-<p>
-</p>
-<h1><a name="name">NAME</a></h1>
 <p>egw2fbox.pl</p>
-<p>
-</p>
-<hr />
-<h1><a name="description">DESCRIPTION</a></h1>
-<p>The purpose of this script is to run on a server and provide an automated way of sharing eGroupware 
-hosted phone numbers and e-mail addresses with clients not supporting any other server based 
-synchronization.</p>
-<p>The phone numbers and e-mail addresses are read from the eGroupware database table <em>contacts</em> and 
-exports in the native format of each clients.</p>
-<p>Because the supported clients have very limited address book capabilities, this is a one-way communication 
-only. Hence, client side changes are not reported back to eGroupware and the client address books 
-should be configured to be readonly as much as possible.</p>
-<p><em class="file">egw2fbox.pl</em> has functionality called <em>lazy update</em> that can be configured per each client RoundCube,
-MUTT and FritzBox that only writes to the clients if data inside the eGroupware database was changed. 
-This reduces CPU time but - more important - also reduces the need for uploading data
-to clients where continuous writing would have disadvantages. 
-For example the FritzBox address book that stores the addresses in flash memory. Because flash memory has a 
-limited write cycles, it is better to update the address book only if there had been changes. <em class="file">egw2fbox.pl</em> 
-can be safely used together with <em class="file">cronjob.sh</em> because it avoids unnecessary write cycles as much as possible.</p>
+
+<h1 id="DESCRIPTION">DESCRIPTION</h1>
+
+<p>The purpose of this script is to run on a server and provide an automated way of sharing eGroupware hosted phone numbers and e-mail addresses with clients not supporting any other server based synchronization.</p>
+
+<p>The phone numbers and e-mail addresses are read from the eGroupware database table <i>contacts</i> and exports in the native format of each clients.</p>
+
+<p>Because the supported clients have very limited address book capabilities, this is a one-way communication only. Hence, client side changes are not reported back to eGroupware and the client address books should be configured to be readonly as much as possible.</p>
+
+<p><i>egw2fbox.pl</i> has functionality called <i>lazy update</i> that can be configured per each client RoundCube, MUTT and FritzBox that only writes to the clients if data inside the eGroupware database was changed. This reduces CPU time but - more important - also reduces the need for uploading data to clients where continuous writing would have disadvantages. For example the FritzBox address book that stores the addresses in flash memory. Because flash memory has a limited write cycles, it is better to update the address book only if there had been changes. <i>egw2fbox.pl</i> can be safely used together with <i>cronjob.sh</i> because it avoids unnecessary write cycles as much as possible.</p>
+
 <p>Currently supported clients are:</p>
-<dl>
-<dt><strong><a name="phone_numbers" class="item">phone numbers:</a></strong>
 
+<dl>
+
+<dt id="phone-numbers">phone numbers:</dt>
 <dd>
+
 <p>- Fritz Box router address book</p>
-</dd>
-</li>
-<dt><strong><a name="e_mail_addresses" class="item">e-mail addresses:</a></strong>
 
+</dd>
+<dt id="e-mail-addresses">e-mail addresses:</dt>
 <dd>
+
 <p>- Round Cube web mailer including personal and global address book</p>
-</dd>
-<dd>
+
 <p>- MUTT command line mail client</p>
+
 </dd>
-</li>
 </dl>
+
 <p>For uploading the created XML address book to a Fritz Box a small perl script called FritzUploader from Jan-Piet Mens is used.</p>
-<p>
-</p>
-<hr />
-<h1><a name="synopsis">SYNOPSIS</a></h1>
+
+<h1 id="SYNOPSIS">SYNOPSIS</h1>
+
 <p><code>egw2fbox.pl [--verbose] [-v] [--config filename.ini] [-c filename.ini] [--version] [--help] [-h] [-?] [--man] [--changelog]</code></p>
-<p>
-</p>
-<hr />
-<h1><a name="options">OPTIONS</a></h1>
+
+<h1 id="OPTIONS">OPTIONS</h1>
+
 <p>Runtime:</p>
-<dl>
-<dt><strong><a name="verbose_v" class="item">--verbose -v</a></strong>
 
+<dl>
+
+<dt id="verbose--v">--verbose -v</dt>
 <dd>
+
 <p>Logs to STDOUT while executing the script.</p>
-</dd>
-</li>
-<dt><strong><a name="config_filename_ini_c_filename_ini" class="item">--config filename.ini   -c filename.ini</a></strong>
 
+</dd>
+<dt id="config-filename.ini--c-filename.ini">--config filename.ini -c filename.ini</dt>
 <dd>
+
 <p>File name containing all configuration.</p>
-</dd>
-<dd>
+
 <p>See sections CONFIG FILE and TUTORIALS for further information.</p>
+
 </dd>
-</li>
 </dl>
+
 <p>Documentation:</p>
+
 <dl>
-<dt><strong><a name="version" class="item">--version</a></strong>
 
+<dt id="version">--version</dt>
 <dd>
+
 <p>Prints the version numbers.</p>
-</dd>
-</li>
-<dt><strong><a name="help_h" class="item">--help -h -?</a></strong>
 
+</dd>
+<dt id="help--h">--help -h -?</dt>
 <dd>
+
 <p>Print a brief help message.</p>
-</dd>
-</li>
-<dt><strong><a name="man" class="item">--man</a></strong>
 
+</dd>
+<dt id="man">--man</dt>
 <dd>
+
 <p>Prints the complete manual page.</p>
-</dd>
-</li>
-<dt><strong><a name="changelog" class="item">--changelog</a></strong>
 
-<dd>
-<p>Prints the change log.</p>
 </dd>
-</li>
+<dt id="changelog">--changelog</dt>
+<dd>
+
+<p>Prints the change log.</p>
+
+</dd>
 </dl>
-<p>
-</p>
-<hr />
-<h1><a name="copyright_and_license">COPYRIGHT AND LICENSE</a></h1>
-<p>Copyright 2011-2014 by Christian Anton &lt;<a href="mailto:mail@christiananton.de">mail@christiananton.de</a>&gt;, Kai Ellinger &lt;<a href="mailto:coding@blicke.de">coding@blicke.de</a>&gt;</p>
-<p>This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.</p>
-<p>This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.</p>
-<p>You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
-MA 02110-1301, USA.</p>
-<p>
-</p>
-<hr />
-<h1><a name="history">HISTORY</a></h1>
-<pre>
+
+<h1 id="COPYRIGHT-AND-LICENSE">COPYRIGHT AND LICENSE</h1>
+
+<p>Copyright 2011-2014 by Christian Anton &lt;mail@christiananton.de&gt;, Kai Ellinger &lt;coding@blicke.de&gt;</p>
+
+<p>This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2 of the License, or (at your option) any later version.</p>
+
+<p>This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.</p>
+
+<p>You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.</p>
+
+<h1 id="HISTORY">HISTORY</h1>
+
+<pre><code> 0.08.04 2017-08-06 Kai Ellinger &lt;coding@blicke.de&gt;
+      Added user name support to bin/fritzuploader.pl
+
  0.08.03 2014-02-28 Christian Anton &lt;mail@christiananton.de&gt;, Kai Ellinger &lt;coding@blicke.de&gt;
-      Moving code to github, adding README.md</pre>
-<pre>
+      Moving code to github, adding README.md
+
  0.08.02 2013-10-03 Kai Ellinger &lt;coding@blicke.de&gt;
       Fixed bin/fritzuploader.pl in order to work with new Fritzbox firmware versions 
-       See: https://github.com/jpmens/fritzuploader/issues/1</pre>
-<pre>
+       See: https://github.com/jpmens/fritzuploader/issues/1
+
  0.08.01 2011-05-05 Kai Ellinger &lt;coding@blicke.de&gt;
        Documentation:
        - Finished API docs
-       - Creating 'bin/create_docs.sh' and related files under 'docs' directory
-       - Creating minor versions of INSTALL and CONFIG FILE sections</pre>
-<pre>
+       - Creating &#39;bin/create_docs.sh&#39; and related files under &#39;docs&#39; directory
+       - Creating minor versions of INSTALL and CONFIG FILE sections
+
  0.08.00 2011-04-05 Kai Ellinger &lt;coding@blicke.de&gt;
        Documentation:
        - Started implementing the documentation via perlpod
        - Implemented command line options:
-         [--version] [--help] [-h] [-?] [--man] [--changelog]</pre>
-<pre>
+         [--version] [--help] [-h] [-?] [--man] [--changelog]
+
  0.07.01 2011-03-30 Kai Ellinger &lt;coding@blicke.de&gt;
        Round Cube DB:
-       - Fixed bug that not set value for 'email', 'name', 'firstname' or 'surname' 
-         column causes SQL errors. 'email', 'name', 'firstname' will never be NULL
-         due to the implementation. But 'surname' might.
+       - Fixed bug that not set value for &#39;email&#39;, &#39;name&#39;, &#39;firstname&#39; or &#39;surname&#39; 
+         column causes SQL errors. &#39;email&#39;, &#39;name&#39;, &#39;firstname&#39; will never be NULL
+         due to the implementation. But &#39;surname&#39; might.
        - Checking $userId, $changed and $sth as well
-       - Don't let the whole script fail if $userId or $sth is NULL. Only roll back 
-         the Round Cube DB transaction!</pre>
-<pre>
+       - Don&#39;t let the whole script fail if $userId or $sth is NULL. Only roll back 
+         the Round Cube DB transaction!
+
  0.07.00 2011-03-29 Kai Ellinger &lt;coding@blicke.de&gt;
        - Lazy Update implemented
        - Implemented dedicated EGW user lists FBOX_EGW_ADDRBOOK_OWNERS, RCUBE_EGW_ADDRBOOK_OWNERS, MUTT_EGW_ADDRBOOK_OWNERS
-         in addition to already existing global EGW user list EGW_ADDRBOOK_OWNERS</pre>
-<pre>
+         in addition to already existing global EGW user list EGW_ADDRBOOK_OWNERS
+
  0.06.00 2011-03-28 Kai Ellinger &lt;coding@blicke.de&gt;
        RoundCube:
        - It turned out that the current state of the implementation already 
          supports global address books in Round Cube. Successfully tested!
-       - You need to install the Round Cube plug in 'globaladdressbook' first.
-         Download: <a href="http://trac.roundcube.net/wiki/Plugin_Repository">http://trac.roundcube.net/wiki/Plugin_Repository</a></pre>
-<pre>
+       - You need to install the Round Cube plug in &#39;globaladdressbook&#39; first.
+         Download: http://trac.roundcube.net/wiki/Plugin_Repository
+
        Cronjob.sh:
        - Moving hard coded variables from cronjob.sh to egw2fbox.conf:
           * CRON_FBOX_XML_HASH, CRON_FBOX_UPLOAD_SCRIPT
-       - Added comment awareness of config file parser in cronjob.sh</pre>
-<pre>
+       - Added comment awareness of config file parser in cronjob.sh
+
        Update clients only if EGW contacts changed for defined EGW user:
        - Preparation of egw2fbox.conf for lazy update feature:
-          * EGW_LAZY_UPDATE_TIME_STAMP_FILE, FBOX_LAZY_UPDATE, RCUBE_LAZY_UPDATE, MUTT_LAZY_UPDATE</pre>
-<pre>
+          * EGW_LAZY_UPDATE_TIME_STAMP_FILE, FBOX_LAZY_UPDATE, RCUBE_LAZY_UPDATE, MUTT_LAZY_UPDATE
+
        Allow defining a different EGW user list for each client:
        - Preparation of egw2fbox.conf for defining different EGW address book owners per each client
-          * FBOX_EGW_ADDRBOOK_OWNERS, RCUBE_EGW_ADDRBOOK_OWNERS, MUTT_EGW_ADDRBOOK_OWNERS</pre>
-<pre>
+          * FBOX_EGW_ADDRBOOK_OWNERS, RCUBE_EGW_ADDRBOOK_OWNERS, MUTT_EGW_ADDRBOOK_OWNERS
+
  0.05.04 2011-03-28 Kai Ellinger &lt;coding@blicke.de&gt;
        - Removing need for $egw_address_data being an global variable to be able to 
          sync different user / group address books for different clients
        - Making egw_read_db() flexible to return addresses for different address book owners
        - Caching EGW addresses to avoid DB access
        - egw_read_db() now retuning last modified time stamp to stop writing data to external
-         client if not modified since last run, if MAIN calling export routine supports this</pre>
-<pre>
+         client if not modified since last run, if MAIN calling export routine supports this
+
  0.05.03 2011-03-10 Kai Ellinger &lt;coding@blicke.de&gt;
        - implemented SQL part of round cube address book sync but
-         still check field size before inserting into DB needs tbd</pre>
-<pre>
+         still check field size before inserting into DB needs tbd
+
  0.05.02 2011-03-08 Kai Ellinger &lt;coding@blicke.de&gt;
        - started implementing round cube address book sync because I feel it is urgent ;-)
          did not touch any SQL code, need to update all TO DOs with inserting SQL code
-       - remove need for $FRITZXML being a global variable</pre>
-<pre>
+       - remove need for $FRITZXML being a global variable
+
  0.05.01 2011-03-04 Christian Anton &lt;mail@christiananton.de&gt;
        - tidy up code to fulfill Perl::Critic tests at &quot;gentle&quot; severity:
-       <a href="http://www.perlcritic.org/">http://www.perlcritic.org/</a></pre>
-<pre>
+       http://www.perlcritic.org/
+
  0.05.00 2011-03-04 Christian Anton &lt;mail@christiananton.de&gt;, Kai Ellinger &lt;coding@blicke.de&gt;
        - data is requested from DB in UTF8 and explicitly converted in desired encoding
          inside of fbox_write_xml_contact function
        - mutt export function now writes aliases file in UTF-8 now. If you use anything
-         different - you're wrong!
+         different - you&#39;re wrong!
        - fixed bug: for private contact entries in FritzBox the home number was taken from
          database field tel_work instead of tel_home
        - extended fbox_reformatTelNr to support local phone number annotation to work around
-         inability of FritzBox to rewrite phone number for incoming calls</pre>
-<pre>
+         inability of FritzBox to rewrite phone number for incoming calls
+
  0.04.00 2011-03-02 Kai Ellinger &lt;coding@blicke.de&gt;
        - added support for mutt address book including an example file showing 
          how to configure ~/.muttrc to support a local address book and a global
@@ -278,8 +256,8 @@ MA 02110-1301, USA.</p>
        - replaced time stamp in fritz box xml with real time stamp from database
          this feature is more interesting for round cube integration where we have
          a time stamp field in the round cube database
-       - added some comments</pre>
-<pre>
+       - added some comments
+
  0.03.00 2011-02-26 Kai Ellinger &lt;coding@blicke.de&gt;
        - Verbose function:
           * only prints if data was provided
@@ -288,244 +266,276 @@ MA 02110-1301, USA.</p>
        - Respect that Fritzbox address book names can only have 25 characters
        - EGW address book to Fritz Box phone book mapping:
          The Fritz Box Phone book knows 3 different telephone number types:
-           'work', 'home' and 'mobile'
+           &#39;work&#39;, &#39;home&#39; and &#39;mobile&#39;
          Each Fritz Box phone book entry can have up to 3 phone numbers.
          All 1-3 phone numbers can be of same type or different types.
          * Compact mode (if one EGW address has 1-3 phone numbers):
-            EGW field tel_work          -&gt; FritzBox field type 'work'
-            EGW field tel_cell          -&gt; FritzBox field type 'mobile'
-            EGW field tel_assistent     -&gt; FritzBox field type 'work'
-            EGW field tel_home          -&gt; FritzBox field type 'home'
-            EGW field tel_cell_private  -&gt; FritzBox field type 'mobile'
-            EGW field tel_other         -&gt; FritzBox field type 'home'
+            EGW field tel_work          -&gt; FritzBox field type &#39;work&#39;
+            EGW field tel_cell          -&gt; FritzBox field type &#39;mobile&#39;
+            EGW field tel_assistent     -&gt; FritzBox field type &#39;work&#39;
+            EGW field tel_home          -&gt; FritzBox field type &#39;home&#39;
+            EGW field tel_cell_private  -&gt; FritzBox field type &#39;mobile&#39;
+            EGW field tel_other         -&gt; FritzBox field type &#39;home&#39;
            NOTE: Because we only have 3 phone numbers, we stick on the right number types.
          * Business Fritz Box phone book entry (&gt;3 phone numbers):
-            EGW field tel_work          -&gt; FritzBox field type 'work'
-            EGW field tel_cell          -&gt; FritzBox field type 'mobile'
-            EGW field tel_assistent     -&gt; FritzBox field type 'home'
-           NOTE: On hand sets, the list order is work, mobile, home. That's why the
-                 most important number is 'work' and the less important is 'home' here.
+            EGW field tel_work          -&gt; FritzBox field type &#39;work&#39;
+            EGW field tel_cell          -&gt; FritzBox field type &#39;mobile&#39;
+            EGW field tel_assistent     -&gt; FritzBox field type &#39;home&#39;
+           NOTE: On hand sets, the list order is work, mobile, home. That&#39;s why the
+                 most important number is &#39;work&#39; and the less important is &#39;home&#39; here.
          * Private Fritz Box phone book entry (&gt;3 phone numbers):
-            EGW field tel_home          -&gt; FritzBox field type 'work'
-            EGW field tel_cell_private  -&gt; FritzBox field type 'mobile'
-            EGW field tel_other         -&gt; FritzBox field type 'home'
-           NOTE: On hand sets, the list order is work, mobile, home. That's why the
-                 most important number is 'work' and the less important is 'home' here.
+            EGW field tel_home          -&gt; FritzBox field type &#39;work&#39;
+            EGW field tel_cell_private  -&gt; FritzBox field type &#39;mobile&#39;
+            EGW field tel_other         -&gt; FritzBox field type &#39;home&#39;
+           NOTE: On hand sets, the list order is work, mobile, home. That&#39;s why the
+                 most important number is &#39;work&#39; and the less important is &#39;home&#39; here.
         - Added EGW DB connect string check
-        - All EGW functions have now prefix 'egw_', all Fritz Box functions prefix
-          'fbox_' and all Round Cube functions 'rcube_' to prepare the source for
-          adding the round cube sync.</pre>
-<pre>
+        - All EGW functions have now prefix &#39;egw_&#39;, all Fritz Box functions prefix
+          &#39;fbox_&#39; and all Round Cube functions &#39;rcube_&#39; to prepare the source for
+          adding the round cube sync.
+
  0.02.00 2011-02-25 Christian Anton &lt;mail@christiananton.de&gt;
           implementing XML-write as an extra function and implementing COMPACT_MODE which
-          omits creating two contact entries for contacts which have only up to three numbers</pre>
-<pre>
+          omits creating two contact entries for contacts which have only up to three numbers
+
  0.01.00 2011-02-24 Kai Ellinger &lt;coding@blicke.de&gt;, Christian Anton &lt;mail@christiananton.de&gt;
-          Initial version of this script, ready for world domination ;-)</pre>
-<p>
-</p>
-<hr />
-<h1><a name="installation">INSTALLATION</a></h1>
-<p>- A current version of <strong>PERL</strong> is needed. <em class="file">egw2fbox.pl</em> requires module DBI and DBD::Mysql. 
-<em class="file">fritzuploader.pl</em> requires module XML::Simple. All other modules needed to run the script 
-are part of the standard perl library and don't need to be installed.</p>
+          Initial version of this script, ready for world domination ;-)</code></pre>
+
+<h1 id="INSTALLATION">INSTALLATION</h1>
+
+<p>- A current version of <b>PERL</b> is needed. <i>egw2fbox.pl</i> requires module DBI and DBD::Mysql. <i>fritzuploader.pl</i> requires module XML::Simple and URI::Encode. All other modules needed to run the script are part of the standard perl library and don&#39;t need to be installed.</p>
+
 <p>- Clone the head revision from <a href="https://github.com/fibbs/egw2fbox">https://github.com/fibbs/egw2fbox</a></p>
-<p>- Copy file <em class="file">etc/egw2fbox.conf.default</em> to <em class="file">etc/egw2fbox.conf</em> and update values according to your needs</p>
+
+<p>- Copy file <i>etc/egw2fbox.conf.default</i> to <i>etc/egw2fbox.conf</i> and update values according to your needs</p>
+
 <p>- Test in verbose mode: <code>/path/to/egw2fbox/bin/cronjob.sh -v -c /path/to/egw2fbox/etc/egw2fbox.conf</code></p>
+
 <p>- Add to your crontab:</p>
+
 <p><code>*/20 * * * * /path/to/egw2fbox/bin/cronjob.sh -c /path/to/egw2fbox/etc/egw2fbox.conf</code></p>
-<p>
-</p>
-<hr />
-<h1><a name="config_file">CONFIG FILE</a></h1>
-<p>This section may later describes the structure of the INI file used by this script. 
-Until now, see the comments in <em class="file">egw2fbox.conf.default</em>.</p>
-<p>* File <em class="file">egw2fbox.pl</em> uses command line option <code>-config /path/to/fileName.ini</code>, default is <em class="file">egw2fbox.conf</em>.</p>
-<p>* File <em class="file">cronjob.sh</em> uses command line option <code>-c /path/to/fileName.ini</code>, no default value.</p>
-<p>* File <em class="file">fritzuploader.pl</em> searches for the value of environment variable FRITZUPLOADERCFG, default is <em class="file">fritzuploader.conf</em>.</p>
-<p>
-</p>
-<h2><a name="egoupware_section">eGoupware section</a></h2>
+
+<h1 id="CONFIG-FILE">CONFIG FILE</h1>
+
+<p>This section may later describes the structure of the INI file used by this script. Until now, see the comments in <i>egw2fbox.conf.default</i>.</p>
+
+<p>* File <i>egw2fbox.pl</i> uses command line option <code>-config /path/to/fileName.ini</code>, default is <i>egw2fbox.conf</i>.</p>
+
+<p>* File <i>cronjob.sh</i> uses command line option <code>-c /path/to/fileName.ini</code>, no default value.</p>
+
+<p>* File <i>fritzuploader.pl</i> searches for the value of environment variable FRITZUPLOADERCFG, default is <i>fritzuploader.conf</i>.</p>
+
+<h2 id="eGoupware-section">eGoupware section</h2>
+
 <p>Configuration settings related to the eGroupware database</p>
-<p>
-</p>
-<h2><a name="fritzbox_section">FritzBox section</a></h2>
+
+<h2 id="FritzBox-section">FritzBox section</h2>
+
 <p>Configuration settings related to the Fritz Box</p>
-<p>
-</p>
-<h2><a name="round_cube_section">Round Cube section</a></h2>
+
+<h2 id="Round-Cube-section">Round Cube section</h2>
+
 <p>Configuration settings related to the Round Cube database</p>
-<p>
-</p>
-<h2><a name="mutt_section">MUTT section</a></h2>
+
+<h2 id="MUTT-section">MUTT section</h2>
+
 <p>Configuration settings related to MUTT</p>
-<p>
-</p>
-<hr />
-<h1><a name="api">API</a></h1>
-<p>
-</p>
-<h2><a name="required_perl_modules">Required Perl modules</a></h2>
+
+<h1 id="API">API</h1>
+
+<h2 id="Required-Perl-modules">Required Perl modules</h2>
+
 <p>Most Perl modules used by this program are part of the standard perl library perlmodlib <a href="http://perldoc.perl.org/perlmodlib.html">http://perldoc.perl.org/perlmodlib.html</a> and are installed by default.</p>
+
 <p>The only modules that might not be available by default are to access the MySQL database and are named DBI and DBD::Mysql.</p>
-<p>
-</p>
-<h2><a name="function_check_args___">Function check_args ()</a></h2>
+
+<h2 id="Function-check_args">Function check_args ()</h2>
+
 <p>This function is checking command line options and printing help messages if requested.</p>
+
 <p>IN: No parameter</p>
+
 <p>OUT: Returns nothing</p>
-<p>
-</p>
-<h2><a name="function_parse_config___">Function parse_config ()</a></h2>
-<p>This function is parsing the config file given by command line option '-c filename.ini'.</p>
+
+<h2 id="Function-parse_config">Function parse_config ()</h2>
+
+<p>This function is parsing the config file given by command line option &#39;-c filename.ini&#39;.</p>
+
 <p>IN: No parameter</p>
+
 <p>OUT: Returns nothing</p>
-<p>
-</p>
-<h2><a name="function_verbose__string_message_">Function verbose (STRING message)</a></h2>
+
+<h2 id="Function-verbose-STRING-message">Function verbose (STRING message)</h2>
+
 <p>Printing out verbose messages if verbose mode is enabled.</p>
+
 <p>IN: Takes the message to print out</p>
+
 <p>OUT: Returns nothing</p>
-<p>
-</p>
-<h2><a name="function_sort_user_id_list__string_user_id_list_">Function sort_user_id_list (STRING user_id_list)</a></h2>
-<p>This function is called by function find_EGW_user (STRING user_id_list) to sort 
-the user list it looked up before.</p>
-<p>This is needed to avoid unnecessary database accesses even the config parameters EGW_ADDRBOOK_OWNERS, 
-FBOX_EGW_ADDRBOOK_OWNERS, RCUBE_EGW_ADDRBOOK_OWNERS and MUTT_EGW_ADDRBOOK_OWNERS list 
-the user ids in different order and with different wide spaces.</p>
+
+<h2 id="Function-sort_user_id_list-STRING-user_id_list">Function sort_user_id_list (STRING user_id_list)</h2>
+
+<p>This function is called by function find_EGW_user (STRING user_id_list) to sort the user list it looked up before.</p>
+
+<p>This is needed to avoid unnecessary database accesses even the config parameters EGW_ADDRBOOK_OWNERS, FBOX_EGW_ADDRBOOK_OWNERS, RCUBE_EGW_ADDRBOOK_OWNERS and MUTT_EGW_ADDRBOOK_OWNERS list the user ids in different order and with different wide spaces.</p>
+
 <p>The default Perl sort algorithm is used even if it is not a numeric algorithm. But this is not needed anyway.</p>
+
 <p>IN: Takes an unsorted user id list string</p>
+
 <p>OUT: Returns a sorted user id list string</p>
-<p>
-</p>
-<h2><a name="function_find_egw_user__string_config_parameter_">Function find_EGW_user (STRING config_parameter)</a></h2>
-<p>This function returns a sorted user id list string that is either defined by the global 
-configuration parameter EGW_ADDRBOOK_OWNERS or one of the parameters
-FBOX_EGW_ADDRBOOK_OWNERS, RCUBE_EGW_ADDRBOOK_OWNERS and MUTT_EGW_ADDRBOOK_OWNERS
-to overwrite the global parameter.</p>
+
+<h2 id="Function-find_EGW_user-STRING-config_parameter">Function find_EGW_user (STRING config_parameter)</h2>
+
+<p>This function returns a sorted user id list string that is either defined by the global configuration parameter EGW_ADDRBOOK_OWNERS or one of the parameters FBOX_EGW_ADDRBOOK_OWNERS, RCUBE_EGW_ADDRBOOK_OWNERS and MUTT_EGW_ADDRBOOK_OWNERS to overwrite the global parameter.</p>
+
 <p>IN: Config parameter name FBOX_EGW_ADDRBOOK_OWNERS, RCUBE_EGW_ADDRBOOK_OWNERS or MUTT_EGW_ADDRBOOK_OWNERS</p>
+
 <p>OUT: Returns a sorted user id list string</p>
-<p>
-</p>
-<h2><a name="function_egw_read_db__string_user_id_list_">Function egw_read_db (STRING user_id_list)</a></h2>
+
+<h2 id="Function-egw_read_db-STRING-user_id_list">Function egw_read_db (STRING user_id_list)</h2>
+
 <p>Connects to eGroupware database and looks up address book values for the given user id list including time stamp of last change.</p>
+
 <p>IN: User id list to lookup</p>
+
 <p>OUT: Returns two parameters:</p>
+
 <p>- all address data belonging to the user list</p>
+
 <p>- the time stamp when this list was modified the last time</p>
-<p>
-</p>
-<h2><a name="function_fbox_reformattelnr__string_phone_number_">Function fbox_reformatTelNr (STRING phone_number)</a></h2>
-<p>This is a helper function called by function fbox_write_xml_contact format the phone number in a way that the Fritz Box can resolve it.
-How the phone number is formatted exactly is defined in the fritz box configuration section of the config file.</p>
-<p>First, each phone number is re-formatted like 00498912345678. Later the phone numbers with the same country code or with the same area code 
-get the leading numbers removed if configured.</p>
-<p>This is needed because the Fritz Box can not recognize that phone number 00498912345678 is the same as 08912345678 calling from the 
-same country is the same as 12345678 calling from the same city. But the right phone number syntax is very important to get the names 
-resolved for incoming calls as well as to replace the phone numbers with the names in the phone call protocols maintain
-that can either be viewed via web console or mail. Same is true for the incoming mail box calls that can be forwarded via e-mail as well.</p>
+
+<h2 id="Function-fbox_reformatTelNr-STRING-phone_number">Function fbox_reformatTelNr (STRING phone_number)</h2>
+
+<p>This is a helper function called by function fbox_write_xml_contact format the phone number in a way that the Fritz Box can resolve it. How the phone number is formatted exactly is defined in the fritz box configuration section of the config file.</p>
+
+<p>First, each phone number is re-formatted like 00498912345678. Later the phone numbers with the same country code or with the same area code get the leading numbers removed if configured.</p>
+
+<p>This is needed because the Fritz Box can not recognize that phone number 00498912345678 is the same as 08912345678 calling from the same country is the same as 12345678 calling from the same city. But the right phone number syntax is very important to get the names resolved for incoming calls as well as to replace the phone numbers with the names in the phone call protocols maintain that can either be viewed via web console or mail. Same is true for the incoming mail box calls that can be forwarded via e-mail as well.</p>
+
 <p>IN: Phone number in any format it can exist in eGrouware</p>
+
 <p>OUT: Phone number formatted in a way that the Fritz Box can resolve incoming calls correctly</p>
-<p>
-</p>
-<h2><a name="function_fbox_write_xml_contact__handle_xml_file__string_contact_name__string_contact_name_suffix__array_ref_phone_numbers__number_timestamp_">Function fbox_write_xml_contact (HANDLE xml_file, STRING contact_name, STRING contact_name_suffix, ARRAY REF phone_numbers, NUMBER timestamp)</a></h2>
-<p>This is a function called by function fbox_gen_fritz_xml for each single contact that needs to be written to the 
-XML file. The contact name is formatted to fit into the restrictions of  the Fritz Box and the phones connected to it.</p>
+
+<h2 id="Function-fbox_write_xml_contact-HANDLE-xml_file-STRING-contact_name-STRING-contact_name_suffix-ARRAY-REF-phone_numbers-NUMBER-timestamp">Function fbox_write_xml_contact (HANDLE xml_file, STRING contact_name, STRING contact_name_suffix, ARRAY REF phone_numbers, NUMBER timestamp)</h2>
+
+<p>This is a function called by function fbox_gen_fritz_xml for each single contact that needs to be written to the XML file. The contact name is formatted to fit into the restrictions of the Fritz Box and the phones connected to it.</p>
+
 <p>IN:</p>
+
 <p>- handle for XML file</p>
+
 <p>- contact_name</p>
+
 <p>- contact_name_suffix = shift;</p>
+
 <p>- array ref with all phone numbers</p>
+
 <p>- timestamp of last update in eGroupware DB</p>
+
 <p>OUT: Nothing</p>
-<p>
-</p>
-<h2><a name="function_fbox_count_contacts_numbers__hash_ref_egw_address_data__string_key_to_search_">Function fbox_count_contacts_numbers (HASH REF egw_address_data, STRING key_to_search)</a></h2>
-<p>This is a function called by function fbox_gen_fritz_xml for each single contact found in the eGroupware address book to 
-know how many phone numbers this contact has. If there are no phone numbers, this contact must not imported to the Fritz Box.
-If there are more than 3 phone numbers, the contact must be split into a business contact and a private contact because
-the Fritz Box can only hold 3 phone numbers per contact.</p>
+
+<h2 id="Function-fbox_count_contacts_numbers-HASH-REF-egw_address_data-STRING-key_to_search">Function fbox_count_contacts_numbers (HASH REF egw_address_data, STRING key_to_search)</h2>
+
+<p>This is a function called by function fbox_gen_fritz_xml for each single contact found in the eGroupware address book to know how many phone numbers this contact has. If there are no phone numbers, this contact must not imported to the Fritz Box. If there are more than 3 phone numbers, the contact must be split into a business contact and a private contact because the Fritz Box can only hold 3 phone numbers per contact.</p>
+
 <p>IN:</p>
+
 <p>- HASH REF the address list to search</p>
+
 <p>- STRING key of the address that needs to be searched from the list</p>
+
 <p>OUT: NUMBER count of found phone numbers</p>
-<p>
-</p>
-<h2><a name="function_fbox_gen_fritz_xml__hash_ref_egw_address_data_">Function fbox_gen_fritz_xml (HASH REF egw_address_data)</a></h2>
+
+<h2 id="Function-fbox_gen_fritz_xml-HASH-REF-egw_address_data">Function fbox_gen_fritz_xml (HASH REF egw_address_data)</h2>
+
 <p>This function creates the XML file to upload to the Fritz Box.</p>
+
 <p>IN: HASH REF the address list</p>
+
 <p>OUT: Nothing</p>
-<p>
-</p>
-<h2><a name="function_rcube_update_address_book__hash_ref_egw_address_data_">Function rcube_update_address_book (HASH REF egw_address_data)</a></h2>
-<p>This function the Round Cube database with names and e-mail addresses of the 
-EGW address book by deleting the whole contacts table for the configured user 
-and inserting each contact again. If there is any error, the whole DB transaction
-is rolled back.</p>
+
+<h2 id="Function-rcube_update_address_book-HASH-REF-egw_address_data">Function rcube_update_address_book (HASH REF egw_address_data)</h2>
+
+<p>This function the Round Cube database with names and e-mail addresses of the EGW address book by deleting the whole contacts table for the configured user and inserting each contact again. If there is any error, the whole DB transaction is rolled back.</p>
+
 <p>IN: HASH REF the address list</p>
+
 <p>OUT: Nothing</p>
-<p>
-</p>
-<h2><a name="function_rcube_insert_mail_address__handle_sql_statement_handle__string_email__string_name__string_first_name__string_family_name__number_timestamp_">Function rcube_insert_mail_address (HANDLE sql_statement_handle, STRING email, STRING name, STRING first_name, STRING family_name, NUMBER timestamp)</a></h2>
+
+<h2 id="Function-rcube_insert_mail_address-HANDLE-sql_statement_handle-STRING-email-STRING-name-STRING-first_name-STRING-family_name-NUMBER-timestamp">Function rcube_insert_mail_address (HANDLE sql_statement_handle, STRING email, STRING name, STRING first_name, STRING family_name, NUMBER timestamp)</h2>
+
 <p>Helper function called by function rcube_update_address_book.</p>
+
 <p>Executes an INSERT statement per each e-mail address.</p>
+
 <p>IN:</p>
+
 <p>- handle for SQL statement</p>
+
 <p>- email address</p>
+
 <p>- full name</p>
+
 <p>- first name</p>
+
 <p>- family name</p>
+
 <p>- changed time stamp from EGW database</p>
+
 <p>OUT: Nothing</p>
-<p>
-</p>
-<h2><a name="function_mutt_update_address_book__hash_ref_egw_address_data_">Function mutt_update_address_book (HASH REF egw_address_data)</a></h2>
+
+<h2 id="Function-mutt_update_address_book-HASH-REF-egw_address_data">Function mutt_update_address_book (HASH REF egw_address_data)</h2>
+
 <p>This function creates a TXT file to be used as MUTT address book.</p>
+
 <p>IN: HASH REF the address list</p>
+
 <p>OUT: Nothing</p>
-<p>
-</p>
-<h2><a name="main">MAIN</a></h2>
-<p>Function check_args () and parse_config () are called to load the configuration before reading 
-the EGW database and creating address books for FritzBox, Round Cube and MUTT function creates 
-a TXT file to be used as MUTT address book.</p>
-<p>
-</p>
-<hr />
-<h1><a name="tutorials">TUTORIALS</a></h1>
+
+<h2 id="MAIN">MAIN</h2>
+
+<p>Function check_args () and parse_config () are called to load the configuration before reading the EGW database and creating address books for FritzBox, Round Cube and MUTT function creates a TXT file to be used as MUTT address book.</p>
+
+<h1 id="TUTORIALS">TUTORIALS</h1>
+
 <p>This is a set of small tutorials for synchronizing the supported clients with eGroupware.</p>
-<p>
-</p>
-<h2><a name="connecting_to_the_database_">Connecting to the database.</a></h2>
+
+<h2 id="Connecting-to-the-database">Connecting to the database.</h2>
+
 <p>TBD</p>
-<p>
-</p>
-<h2><a name="setting_up_the_fritzbox_address_book">Setting up the FritzBox address book</a></h2>
+
+<h2 id="Setting-up-the-FritzBox-address-book">Setting up the FritzBox address book</h2>
+
 <p>TBD</p>
-<p>
-</p>
-<h2><a name="setting_up_the_round_cube_address_book">Setting up the Round Cube address book</a></h2>
+
+<h2 id="Setting-up-the-Round-Cube-address-book">Setting up the Round Cube address book</h2>
+
 <p>TBD</p>
-<p>
-</p>
-<h2><a name="setting_up_the_mutt_address_book">Setting up the MUTT address book</a></h2>
+
+<h2 id="Setting-up-the-MUTT-address-book">Setting up the MUTT address book</h2>
+
 <p>TBD</p>
-<p>
-</p>
-<hr />
-<h1><a name="authors">AUTHORS</a></h1>
+
+<h1 id="AUTHORS">AUTHORS</h1>
+
 <p>Christian Anton (@fibbs)</p>
-<p>Kai Ellinger &lt;<a href="mailto:coding@blicke.de">coding@blicke.de</a>&gt;</p>
-<p>
-</p>
-<hr />
-<h1><a name="see_also">SEE ALSO</a></h1>
+
+<p>Kai Ellinger &lt;coding@blicke.de&gt;</p>
+
+<h1 id="SEE-ALSO">SEE ALSO</h1>
+
 <p>- Fritz Box router product family from AVM <a href="http://www.avm.de/en/Produkte/FRITZBox/index.html">http://www.avm.de/en/Produkte/FRITZBox/index.html</a></p>
+
 <p>- FritzUploader to upload XML address books to a Fritz Box from Jan-Piet Mens <a href="https://github.com/jpmens/fritzuploader">https://github.com/jpmens/fritzuploader</a></p>
+
 <p>- Round Cube Web based mail client <a href="http://roundcube.net">http://roundcube.net</a></p>
+
 <p>- MUTT command line mail client <a href="http://www.mutt.org">http://www.mutt.org</a></p>
+
 
 </body>
 
 </html>
+
+

@@ -133,7 +133,7 @@
 .\" ========================================================================
 .\"
 .IX Title "EGW2FBOX 1"
-.TH EGW2FBOX 1 "2014-02-28" "perl v5.10.0" "User Contributed Perl Documentation"
+.TH EGW2FBOX 1 "2017-08-06" "perl v5.20.2" "User Contributed Perl Documentation"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -221,6 +221,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
 .SH "HISTORY"
 .IX Header "HISTORY"
 .Vb 2
+\& 0.08.04 2017\-08\-06 Kai Ellinger <coding@blicke.de>
+\&      Added user name support to bin/fritzuploader.pl
+\&
 \& 0.08.03 2014\-02\-28 Christian Anton <mail@christiananton.de>, Kai Ellinger <coding@blicke.de>
 \&      Moving code to github, adding README.md
 \&
@@ -360,7 +363,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
 .SH "INSTALLATION"
 .IX Header "INSTALLATION"
 \&\- A current version of \fB\s-1PERL\s0\fR is needed. \fIegw2fbox.pl\fR requires module \s-1DBI\s0 and DBD::Mysql. 
-\&\fIfritzuploader.pl\fR requires module XML::Simple. All other modules needed to run the script 
+\&\fIfritzuploader.pl\fR requires module XML::Simple and URI::Encode. All other modules needed to run the script 
 are part of the standard perl library and don't need to be installed.
 .PP
 \&\- Clone the head revision from <https://github.com/fibbs/egw2fbox>

@@ -2,6 +2,9 @@ Name:
     egw2fbox.pl
 
 History:
+     0.08.04 2017-08-06 Kai Ellinger <coding@blicke.de>
+          Added user name support to bin/fritzuploader.pl
+
      0.08.03 2014-02-28 Christian Anton <mail@christiananton.de>, Kai Ellinger <coding@blicke.de>
           Moving code to github, adding README.md
 
