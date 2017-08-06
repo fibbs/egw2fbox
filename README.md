@@ -45,11 +45,11 @@ For uploading the created XML address book to a Fritz Box a small perl script ca
 
 Runtime:
 
-- \--verbose -v
+- --verbose -v
 
     Logs to STDOUT while executing the script.
 
-- \--config filename.ini   -c filename.ini
+- --config filename.ini   -c filename.ini
 
     File name containing all configuration.
 
@@ -57,19 +57,19 @@ Runtime:
 
 Documentation:
 
-- \--version
+- --version
 
     Prints the version numbers.
 
-- \--help -h -?
+- --help -h -?
 
     Print a brief help message.
 
-- \--man
+- --man
 
     Prints the complete manual page.
 
-- \--changelog
+- --changelog
 
     Prints the change log.
 
@@ -94,8 +94,8 @@ MA 02110-1301, USA.
 
 # INSTALLATION
 
-\- A current version of __PERL__ is needed. `egw2fbox.pl` requires module DBI and DBD::Mysql. 
-`fritzuploader.pl` requires module XML::Simple. All other modules needed to run the script 
+\- A current version of **PERL** is needed. `egw2fbox.pl` requires module DBI and DBD::Mysql. 
+`fritzuploader.pl` requires module XML::Simple and URI::Encode. All other modules needed to run the script 
 are part of the standard perl library and don't need to be installed.
 
 \- Clone the head revision from [https://github.com/fibbs/egw2fbox](https://github.com/fibbs/egw2fbox)

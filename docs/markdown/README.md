@@ -45,11 +45,11 @@ For uploading the created XML address book to a Fritz Box a small perl script ca
 
 Runtime:
 
-- \--verbose -v
+- --verbose -v
 
     Logs to STDOUT while executing the script.
 
-- \--config filename.ini   -c filename.ini
+- --config filename.ini   -c filename.ini
 
     File name containing all configuration.
 
@@ -57,19 +57,19 @@ Runtime:
 
 Documentation:
 
-- \--version
+- --version
 
     Prints the version numbers.
 
-- \--help -h -?
+- --help -h -?
 
     Print a brief help message.
 
-- \--man
+- --man
 
     Prints the complete manual page.
 
-- \--changelog
+- --changelog
 
     Prints the change log.
 
@@ -93,6 +93,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
 MA 02110-1301, USA.
 
 # HISTORY
+
+    0.08.04 2017-08-06 Kai Ellinger <coding@blicke.de>
+         Added user name support to bin/fritzuploader.pl
 
     0.08.03 2014-02-28 Christian Anton <mail@christiananton.de>, Kai Ellinger <coding@blicke.de>
          Moving code to github, adding README.md
@@ -134,18 +137,18 @@ MA 02110-1301, USA.
           - You need to install the Round Cube plug in 'globaladdressbook' first.
             Download: http://trac.roundcube.net/wiki/Plugin_Repository
 
-       Cronjob.sh:
-       - Moving hard coded variables from cronjob.sh to egw2fbox.conf:
-          * CRON_FBOX_XML_HASH, CRON_FBOX_UPLOAD_SCRIPT
-       - Added comment awareness of config file parser in cronjob.sh
+          Cronjob.sh:
+          - Moving hard coded variables from cronjob.sh to egw2fbox.conf:
+             * CRON_FBOX_XML_HASH, CRON_FBOX_UPLOAD_SCRIPT
+          - Added comment awareness of config file parser in cronjob.sh
 
-       Update clients only if EGW contacts changed for defined EGW user:
-       - Preparation of egw2fbox.conf for lazy update feature:
-          * EGW_LAZY_UPDATE_TIME_STAMP_FILE, FBOX_LAZY_UPDATE, RCUBE_LAZY_UPDATE, MUTT_LAZY_UPDATE
+          Update clients only if EGW contacts changed for defined EGW user:
+          - Preparation of egw2fbox.conf for lazy update feature:
+             * EGW_LAZY_UPDATE_TIME_STAMP_FILE, FBOX_LAZY_UPDATE, RCUBE_LAZY_UPDATE, MUTT_LAZY_UPDATE
 
-       Allow defining a different EGW user list for each client:
-       - Preparation of egw2fbox.conf for defining different EGW address book owners per each client
-          * FBOX_EGW_ADDRBOOK_OWNERS, RCUBE_EGW_ADDRBOOK_OWNERS, MUTT_EGW_ADDRBOOK_OWNERS
+          Allow defining a different EGW user list for each client:
+          - Preparation of egw2fbox.conf for defining different EGW address book owners per each client
+             * FBOX_EGW_ADDRBOOK_OWNERS, RCUBE_EGW_ADDRBOOK_OWNERS, MUTT_EGW_ADDRBOOK_OWNERS
 
     0.05.04 2011-03-28 Kai Ellinger <coding@blicke.de>
           - Removing need for $egw_address_data being an global variable to be able to 
@@ -232,8 +235,8 @@ MA 02110-1301, USA.
 
 # INSTALLATION
 
-\- A current version of __PERL__ is needed. `egw2fbox.pl` requires module DBI and DBD::Mysql. 
-`fritzuploader.pl` requires module XML::Simple. All other modules needed to run the script 
+\- A current version of **PERL** is needed. `egw2fbox.pl` requires module DBI and DBD::Mysql. 
+`fritzuploader.pl` requires module XML::Simple and URI::Encode. All other modules needed to run the script 
 are part of the standard perl library and don't need to be installed.
 
 \- Clone the head revision from [https://github.com/fibbs/egw2fbox](https://github.com/fibbs/egw2fbox)
@@ -452,10 +455,6 @@ a TXT file to be used as MUTT address book.
 # TUTORIALS
 
 This is a set of small tutorials for synchronizing the supported clients with eGroupware.
-
-
-
-
 
 ## Connecting to the database.
 
