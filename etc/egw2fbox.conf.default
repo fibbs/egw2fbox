@@ -96,6 +96,9 @@ MUTT_EXPORT_FILE = /path/to/egw2fbox_basedir/data/mutt_egw_addresses
 ############################################
 FRITZUPLOADER_FRITZBOX_IP = fritz.box
 FRITZUPLOADER_FRITZBOX_PW = <fb_admin_password>
+# Default: No user name -> admin user
+# Commenting out -> need to create a user at FritzBox user with admin rights
+#FRITZUPLOADER_FRITZBOX_USER = <fbox_admin_user_if_needed>
 FRITZUPLOADER_XML_FILE = /path/to/egw2fbox_basedir/data/phonebook.xml
 
 

@@ -21,6 +21,7 @@ use LWP;        # not included in perlmodlib
 use XML::Simple;# not included in perlmodlib 
 use Digest::MD5 qw(md5 md5_hex); # installed by default via perlmodlib
 use Encode;     # installed by default via perlmodlib
+use URI::Encode qw(uri_encode uri_decode); # URL encoding
 #use Data::Dumper;
 
 ##### use config file instead of command line arguments
@@ -38,6 +39,7 @@ my $cFile = 'fritzuploader.conf';
 ### config parameters for fritzuploader.pl
 ############################################
 #FRITZUPLOADER_FRITZBOX_IP = fritz.box
+#FRITZUPLOADER_FRITZBOX_USER = <fbox_admin_user_if_needed>
 #FRITZUPLOADER_FRITZBOX_PW = <fbox_admin_password>
 #FRITZUPLOADER_XML_FILE = /path/to/phonebook.xml
 #----------------------------------------------------
@@ -64,6 +66,10 @@ sub parse_config {
 parse_config;
 
 my $fritz = $cfg->{FRITZUPLOADER_FRITZBOX_IP};  # or IP address '192.168.1.1'
+my $username = '-';
+if (exists $cfg->{FRITZUPLOADER_FRITZBOX_USER} ) {
+	$username = $cfg->{FRITZUPLOADER_FRITZBOX_USER};
+}
 my $password = $cfg->{FRITZUPLOADER_FRITZBOX_PW};
 my $phonebookFile = $cfg->{FRITZUPLOADER_XML_FILE};
 #my $password = $ARGV[0] or die "Usage: $0 fritzbox-password\n";
@@ -95,7 +101,13 @@ my $challengeresponse = $challenge . '-' . lc(md5_hex($input));
 
 $resp = HTTP::Request->new(POST => "$webcmurl/login_sid.lua");
 $resp->content_type("application/x-www-form-urlencoded");
-$resp->content("response=${challengeresponse}&page=/login_sid.lua");
+# See: https://avm.de/fileadmin/user_upload/Global/Service/Schnittstellen/AVM_Technical_Note_-_Session_ID.pdf
+if ($username eq '-') {
+	$resp->content("response=${challengeresponse}&page=/login_sid.lua");
+
+} else {
+	$resp->content("response=${challengeresponse}&page=/login_sid.lua&username=" . uri_encode( $username ) );
+}
 
 my $loginresp = $ua->request($resp);
 die "Can't get SID " . $loginresp->status_line() . "\n" unless $loginresp->is_success();
