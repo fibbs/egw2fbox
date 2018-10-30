@@ -4,6 +4,9 @@ egw2fbox.pl
 
 # HISTORY
 
+    0.08.05 2018-10-31 Kai Ellinger <coding@blicke.de>
+         Fixed file format issues in FritzBox phone book XML file
+           
     0.08.04 2017-08-06 Kai Ellinger <coding@blicke.de>
          Added user name support to bin/fritzuploader.pl
 

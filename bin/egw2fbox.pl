@@ -111,11 +111,14 @@ MA 02110-1301, USA.
 =cut
 # What is my current version number?
 # For compatibility reasons use 0.01.02 instead of 0.1.2 
-BEGIN { $VERSION = "0.08.04"; }
+BEGIN { $VERSION = "0.08.05"; }
 =pod
 
 =head1 HISTORY
-	
+
+ 0.08.05 2018-10-31 Kai Ellinger <coding@blicke.de>
+      Fixed file format issues in FritzBox phone book XML file
+      	
  0.08.04 2017-08-06 Kai Ellinger <coding@blicke.de>
       Added user name support to bin/fritzuploader.pl
 
@@ -318,6 +321,7 @@ The only modules that might not be available by default are to access the MySQL 
 =cut
 ##### END: perl module requirements #####
 # see http://perldoc.perl.org/perlmodlib.html for what is provided via perlmodlib
+use 5.012;        # changes UTF-8 behavior
 use warnings;     # installed by default via perlmodlib
 use strict;       # installed by default via perlmodlib
 
@@ -328,7 +332,6 @@ use Data::Dumper;            # installed by default via perlmodlib
 use List::Util qw [min max]; # installed by default via perlmodlib
 use Encode;       # installed by default via perlmodlib
 use Storable;     # installed by default via perlmodlib
-
 
 #### global variables
 ## config
@@ -347,8 +350,10 @@ my $FboxMaxLenghtForName = 32;
 # Maybe the code page setting changes based on Fritz Box language settings
 # and must vary for characters other than germany special characters.
 # This variable can be used to specify the code page used at the exported XML.
-my $FboxAsciiCodeTable = "iso-8859-1"; #
-
+my $FboxAsciiCodeTable = "iso-8859-1";
+#my $FboxAsciiCodeTable = "utf-8"; 
+# need some unique counter for FBOX upload
+my $FboxGlobalUniqueIdCounter = 20000;
 
 #### function section
 
@@ -829,17 +834,11 @@ sub fbox_write_xml_contact {
 	my $output_name;
 
 	if( !defined($contact_name) ) { $contact_name = ''; }
-
-	# convert output name to character encoding as defined in $FboxAsciiCodeTable
-	# only contact name and contact name's suffix can contain special chars
-	Encode::from_to($contact_name, "utf8", $FboxAsciiCodeTable);
-	Encode::from_to($contact_name_suffix, "utf8", $FboxAsciiCodeTable);
 	
 	# reformat name according to max length and suffix
 	if ($contact_name_suffix) {
 		$name_length = min($cfg->{FBOX_TOTAL_NAME_LENGTH},$FboxMaxLenghtForName) - 1 - length($contact_name_suffix);
 		$output_name = substr($contact_name,0,$name_length);
-		$output_name =~ s/\s+$//;
 		$output_name = $output_name . " " . $contact_name_suffix;
 	} else {
 		$name_length = min($cfg->{FBOX_TOTAL_NAME_LENGTH},$FboxMaxLenghtForName);
@@ -847,23 +846,50 @@ sub fbox_write_xml_contact {
 		$output_name =~ s/\s+$//;
 	}
 	
+	# convert output name to character encoding as defined in $FboxAsciiCodeTable
+	# only contact name and contact name's suffix can contain special chars
+	Encode::from_to($output_name, "utf8", $FboxAsciiCodeTable);
+	# FIXME - How do I detect a broken UTF8 charachter at the end of the string?
+	$output_name =~ s/\?$//; # causing parsing problems on FritzBox; most likely UTF-8 charachters that are cut in between
+	$output_name =~ s/\&$//; # causing XML problems
+	
+	# calculate number of phone numbers to write to XML file and skip if none
+	my $number_of_phones = $#{$numbers_array_ref};
+	$number_of_phones++;
+	if ($number_of_phones <= 0) {
+		return;
+	}
+	
+	
 	# print the top XML wrap for the contact's entry
-	print $FRITZXML "<contact>\n<category>0</category>\n<person><realName>$output_name</realName></person>\n";
-	print $FRITZXML "<telephony>\n";
+	print $FRITZXML "<contact><category>0</category><person><realName>$output_name</realName></person>\n";
 
+	print $FRITZXML "<telephony nid=\"" . $number_of_phones  . "\">";
+
+	my $phoneNrId = -1;
 	foreach my $numbers_entry_ref (@$numbers_array_ref) {
 		# not defined values causing runtime errors
 		$o_verbose && verbose ("fbox_write_xml_contact()   type: ". ($numbers_entry_ref->{'type'} || "<undefined>") . " , number: ". ($numbers_entry_ref->{'nr'}|| "<undefined>")  );
 		if ($$numbers_entry_ref{'nr'}) {
-			print $FRITZXML "<number type=\"$$numbers_entry_ref{'type'}\" vanity=\"\" prio=\"0\">" .
+			$phoneNrId++;
+			print $FRITZXML "<number type=\"$$numbers_entry_ref{'type'}\" vanity=\"\" prio=\"0\" id=\"${phoneNrId}\">" .
 				fbox_reformatTelNr($$numbers_entry_ref{'nr'}) .
-				"</number>\n";
+				"</number>";
 		}
 	}
-
+	
 	# print the bottom XML wrap for the contact's entry
 	print $FRITZXML "</telephony>\n";
-	print $FRITZXML "<services /><setup /><mod_time>$now_timestamp</mod_time></contact>";
+	print $FRITZXML "<services /><setup /><features doorphone=\"0\" /><mod_time>$now_timestamp</mod_time><uniqueid>" . ${FboxGlobalUniqueIdCounter}++ . "</uniqueid></contact>\n";
+
+	# Example of new XML format
+	#<?xml version="1.0" encoding="utf-8"?>
+	#<phonebooks>
+	#<phonebook owner="1" name="FritzboxTest"><contact><category>0</category><person><realName>my test</realName></person><telephony
+	#nid="3"><number type="home" prio="1" id="0">0812112345</number><number
+	#type="mobile" id="1">01791234567</number><number type="work" id="2">08912345678</number></telephony><services /><setup /><features
+	#doorphone="0" /><mod_time>1540933029</mod_time><uniqueid>11259</uniqueid></contact></phonebook>
+	#</phonebooks>
 }
 
 ##### START: function documentation ##### 
@@ -925,6 +951,15 @@ sub fbox_gen_fritz_xml {
 	# make file descriptor for XML output file global
 	my $FRITZXML;
 	
+	# Example of new XML format
+	#<?xml version="1.0" encoding="utf-8"?>
+	#<phonebooks>
+	#<phonebook owner="1" name="FritzboxTest"><contact><category>0</category><person><realName>my test</realName></person><telephony
+	#nid="3"><number type="home" prio="1" id="0">0812112345</number><number
+	#type="mobile" id="1">01791234567</number><number type="work" id="2">08912345678</number></telephony><services /><setup /><features
+	#doorphone="0" /><mod_time>1540933029</mod_time><uniqueid>11259</uniqueid></contact></phonebook>
+	#</phonebooks>
+	
 	# open file
 	open ($FRITZXML, '>', $cfg->{FBOX_OUTPUT_XML_FILE}) or die "could not open file! $!";
 	print $FRITZXML <<EOF;
@@ -932,21 +967,6 @@ sub fbox_gen_fritz_xml {
 <phonebooks>
 <phonebook name="Telefonbuch">
 EOF
-	# data should look like this:
-	# <contact>
-	#   <category>0</category>
-	#   <person>
-	#     <realName>test user</realName>
-	#   </person>
-	#   <telephony>
-	#     <number type="home" vanity="" prio="0">08911111</number>
-	#     <number type="mobile" vanity="" prio="0">08911112</number>
-	#     <number type="work" vanity="" prio="0">08911113</number>
-	#   </telephony>
-	#   <services />
-	#   <setup />
-	#   <mod_time>1298300800</mod_time>
-	# </contact>
 
 	## start iterate
 
